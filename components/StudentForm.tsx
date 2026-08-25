@@ -5,7 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Loader2, User, Phone, BarChart3, Users, Check } from "lucide-react";
 import { createStudent, updateStudent } from "@/lib/actions";
-import { LEVELS } from "@/lib/constants";
+import { LEVELS, levelLabel } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
 import type { Course, Group, Student } from "@/lib/types";
 
@@ -193,7 +193,7 @@ export function StudentForm({
               {openGroups.length === 0 && <option value="">Ochiq guruh yo'q</option>}
               {openGroups.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name}
+                  {g.name} · {levelLabel(g.min_level)}
                 </option>
               ))}
             </select>
