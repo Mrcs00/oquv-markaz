@@ -31,39 +31,55 @@ export async function createStudent(_prevState: ActionResult, formData: FormData
   }
 
   if (mode === "group") {
-    // Gruppa: o'quvchi to'g'ridan-to'g'ri tanlangan guruhga qo'shiladi.
     const group_id = String(formData.get("group_id") || "");
-    if (!group_id) return fail("Guruhni tanlang.");
+    const course_id = String(formData.get("course_id") || "");
 
-    const { data: group } = await supabase
-      .from("groups")
-      .select("id, course_id, min_level, max_students")
-      .eq("id", group_id)
-      .single();
+    if (!course_id) return fail("Kurs aniqlanmadi.");
 
-    if (!group) return fail("Guruh topilmadi.");
+    if (!group_id) {
+      // "0 dan": hali guruh ochilmagan, guruhsiz "kutmoqda" havzasiga qo'shiladi.
+      const { error } = await supabase.from("students").insert({
+        full_name,
+        phone,
+        phone2: phone2 || null,
+        course_id,
+        level: 0,
+        status: "kutmoqda",
+      });
 
-    const { count } = await supabase
-      .from("students")
-      .select("id", { count: "exact", head: true })
-      .eq("group_id", group_id)
-      .is("deleted_at", null);
+      if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
+    } else {
+      // Tanlangan guruhga to'g'ridan-to'g'ri qo'shiladi.
+      const { data: group } = await supabase
+        .from("groups")
+        .select("id, course_id, min_level, max_students")
+        .eq("id", group_id)
+        .single();
 
-    if ((count ?? 0) >= group.max_students) {
-      return fail("Bu guruh to'liq. Boshqa guruh tanlang.");
+      if (!group) return fail("Guruh topilmadi.");
+
+      const { count } = await supabase
+        .from("students")
+        .select("id", { count: "exact", head: true })
+        .eq("group_id", group_id)
+        .is("deleted_at", null);
+
+      if ((count ?? 0) >= group.max_students) {
+        return fail("Bu guruh to'liq. Boshqa guruh tanlang.");
+      }
+
+      const { error } = await supabase.from("students").insert({
+        full_name,
+        phone,
+        phone2: phone2 || null,
+        course_id: group.course_id,
+        level: group.min_level,
+        group_id,
+        status: "faol",
+      });
+
+      if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
     }
-
-    const { error } = await supabase.from("students").insert({
-      full_name,
-      phone,
-      phone2: phone2 || null,
-      course_id: group.course_id,
-      level: group.min_level,
-      group_id,
-      status: "faol",
-    });
-
-    if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
   } else {
     // Individual: kurs va daraja bo'yicha, guruhsiz saqlanadi.
     const course_id = String(formData.get("course_id") || "");

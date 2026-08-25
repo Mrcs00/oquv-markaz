@@ -5,7 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Loader2, User, Phone, BarChart3, Users, Check } from "lucide-react";
 import { createStudent, updateStudent } from "@/lib/actions";
-import { LEVELS, levelLabel } from "@/lib/constants";
+import { LEVELS } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
 import type { Course, Group, Student } from "@/lib/types";
 
@@ -93,6 +93,7 @@ export function StudentForm({
         </div>
       )}
       <input type="hidden" name="mode" value={effectiveMode} />
+      <input type="hidden" name="course_id" value={koreanCourse?.id ?? ""} />
 
       <div>
         <label className="label" htmlFor="full_name">
@@ -155,7 +156,6 @@ export function StudentForm({
 
       {effectiveMode === "individual" ? (
         <div>
-          <input type="hidden" name="course_id" value={koreanCourse?.id ?? ""} />
           <label className="label" htmlFor="level">
             Daraja
           </label>
@@ -186,14 +186,13 @@ export function StudentForm({
             <select
               id="group_id"
               name="group_id"
-              required
               className="input pl-10"
-              defaultValue={student?.group_id ?? openGroups[0]?.id}
+              defaultValue={student?.group_id ?? ""}
             >
-              {openGroups.length === 0 && <option value="">Ochiq guruh yo'q</option>}
+              <option value="">0 dan</option>
               {openGroups.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name} · {levelLabel(g.min_level)}
+                  {g.name}
                 </option>
               ))}
             </select>
