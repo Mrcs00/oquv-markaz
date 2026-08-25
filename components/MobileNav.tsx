@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   GraduationCap,
@@ -13,6 +13,7 @@ import {
   Trash2,
   Settings,
   LogOut,
+  ArrowLeft,
 } from "lucide-react";
 import { signOut } from "@/lib/actions";
 
@@ -28,20 +29,30 @@ const DRAWER_EXTRA = [
   { href: "/settings", label: "Sozlamalar", icon: Settings },
 ];
 
-export function MobileHeader({ title }: { title: string }) {
+export function MobileHeader({ title, backHref }: { title: string; backHref?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   return (
     <>
       <header className="md:hidden sticky top-0 z-40 flex items-center justify-between h-14 px-4 bg-white/90 backdrop-blur border-b border-slate-100">
-        <button
-          onClick={() => setOpen(true)}
-          className="p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100"
-          aria-label="Menyu"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+        {backHref ? (
+          <Link
+            href={backHref}
+            className="p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100"
+            aria-label="Orqaga"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+        ) : (
+          <button
+            onClick={() => setOpen(true)}
+            className="p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100"
+            aria-label="Menyu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         <h1 className="text-sm font-semibold text-slate-900 truncate">{title}</h1>
         <div className="w-9" />
       </header>

@@ -2,12 +2,12 @@ import type { CallResultValue, StudentStatus } from "@/lib/types";
 
 export const LEVELS = [
   { value: 0, label: "0 dan" },
-  { value: 1, label: "1-daraja" },
-  { value: 2, label: "2-daraja" },
-  { value: 3, label: "3-daraja" },
-  { value: 4, label: "4-daraja" },
-  { value: 5, label: "5-daraja" },
-  { value: 6, label: "6-daraja" },
+  { value: 1, label: "1A" },
+  { value: 2, label: "1B" },
+  { value: 3, label: "2A" },
+  { value: 4, label: "2B" },
+  { value: 5, label: "3A" },
+  { value: 6, label: "3B" },
 ] as const;
 
 export function levelLabel(level: number): string {

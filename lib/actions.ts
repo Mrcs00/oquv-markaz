@@ -21,29 +21,75 @@ function fail(message: string): ActionResult {
 export async function createStudent(_prevState: ActionResult, formData: FormData): Promise<ActionResult> {
   const supabase = createClient();
 
+  const mode = String(formData.get("mode") || "individual");
   const full_name = String(formData.get("full_name") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
-  const course_id = String(formData.get("course_id") || "");
-  const level = Number(formData.get("level"));
+  const phone2 = String(formData.get("phone2") || "").trim();
 
-  if (!full_name || !phone || !course_id || Number.isNaN(level)) {
+  if (!full_name || !phone) {
     return fail("Barcha maydonlarni to'ldiring.");
   }
 
-  const status = level === 0 ? "kutmoqda" : "guruh_kutmoqda";
+  if (mode === "group") {
+    // Gruppa: o'quvchi to'g'ridan-to'g'ri tanlangan guruhga qo'shiladi.
+    const group_id = String(formData.get("group_id") || "");
+    if (!group_id) return fail("Guruhni tanlang.");
 
-  const { error } = await supabase.from("students").insert({
-    full_name,
-    phone,
-    course_id,
-    level,
-    status,
-  });
+    const { data: group } = await supabase
+      .from("groups")
+      .select("id, course_id, min_level, max_students")
+      .eq("id", group_id)
+      .single();
 
-  if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
+    if (!group) return fail("Guruh topilmadi.");
+
+    const { count } = await supabase
+      .from("students")
+      .select("id", { count: "exact", head: true })
+      .eq("group_id", group_id)
+      .is("deleted_at", null);
+
+    if ((count ?? 0) >= group.max_students) {
+      return fail("Bu guruh to'liq. Boshqa guruh tanlang.");
+    }
+
+    const { error } = await supabase.from("students").insert({
+      full_name,
+      phone,
+      phone2: phone2 || null,
+      course_id: group.course_id,
+      level: group.min_level,
+      group_id,
+      status: "faol",
+    });
+
+    if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
+  } else {
+    // Individual: kurs va daraja bo'yicha, guruhsiz saqlanadi.
+    const course_id = String(formData.get("course_id") || "");
+    const level = Number(formData.get("level"));
+
+    if (!course_id || Number.isNaN(level)) {
+      return fail("Barcha maydonlarni to'ldiring.");
+    }
+
+    const status = level === 0 ? "kutmoqda" : "guruh_kutmoqda";
+
+    const { error } = await supabase.from("students").insert({
+      full_name,
+      phone,
+      phone2: phone2 || null,
+      course_id,
+      level,
+      status,
+    });
+
+    if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
+  }
 
   revalidatePath("/");
   revalidatePath("/students");
+  revalidatePath("/groups");
   return { success: true };
 }
 
@@ -56,6 +102,7 @@ export async function updateStudent(
 
   const full_name = String(formData.get("full_name") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
+  const phone2 = String(formData.get("phone2") || "").trim();
   const course_id = String(formData.get("course_id") || "");
   const level = Number(formData.get("level"));
 
@@ -71,7 +118,7 @@ export async function updateStudent(
     .eq("id", studentId)
     .single();
 
-  const updates: Record<string, unknown> = { full_name, phone, course_id, level };
+  const updates: Record<string, unknown> = { full_name, phone, phone2: phone2 || null, course_id, level };
   if (existing && !existing.group_id) {
     updates.status = level === 0 ? "kutmoqda" : "guruh_kutmoqda";
   }

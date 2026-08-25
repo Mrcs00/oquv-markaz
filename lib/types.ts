@@ -27,6 +27,7 @@ export interface Student {
   id: string;
   full_name: string;
   phone: string;
+  phone2: string | null;
   course_id: string;
   level: number;
   group_id: string | null;

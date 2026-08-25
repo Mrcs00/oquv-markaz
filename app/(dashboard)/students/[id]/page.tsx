@@ -3,12 +3,16 @@ import { PageHeader } from "@/components/PageHeader";
 import { EditableStudentCard } from "@/components/EditableStudentCard";
 import { MatchingGroupsList, RemoveFromGroupButton } from "@/components/MatchingGroupsList";
 import { ConfirmButton } from "@/components/ConfirmButton";
-import { getStudentById, getMatchingGroups, getCourses } from "@/lib/data";
+import { getStudentById, getMatchingGroups, getCourses, getGroups } from "@/lib/data";
 import { softDeleteStudent } from "@/lib/actions";
 import { Trash2 } from "lucide-react";
 
 export default async function StudentProfilePage({ params }: { params: { id: string } }) {
-  const [student, courses] = await Promise.all([getStudentById(params.id), getCourses()]);
+  const [student, courses, groups] = await Promise.all([
+    getStudentById(params.id),
+    getCourses(),
+    getGroups(),
+  ]);
 
   if (!student) notFound();
 
@@ -19,10 +23,10 @@ export default async function StudentProfilePage({ params }: { params: { id: str
 
   return (
     <div>
-      <PageHeader title="O'quvchi profili" />
+      <PageHeader title="O'quvchi profili" backHref="/students" />
 
       <div className="p-4 md:p-8 max-w-lg space-y-5">
-        <EditableStudentCard student={student} courses={courses} />
+        <EditableStudentCard student={student} courses={courses} groups={groups} />
 
         {!student.group_id && student.level > 0 && (
           <section>

@@ -5,21 +5,23 @@ import { Pencil, Phone, BookOpen, BarChart3, Users, Calendar } from "lucide-reac
 import { StudentForm } from "@/components/StudentForm";
 import { StatusBadge } from "@/components/Badges";
 import { levelLabel } from "@/lib/constants";
-import type { Course, StudentWithRelations } from "@/lib/types";
+import type { Course, Group, StudentWithRelations } from "@/lib/types";
 
 export function EditableStudentCard({
   student,
   courses,
+  groups,
 }: {
   student: StudentWithRelations;
   courses: Course[];
+  groups?: (Group & { course: Course | null; students: { id: string }[] })[];
 }) {
   const [editing, setEditing] = useState(false);
 
   if (editing) {
     return (
       <div className="card p-5 md:p-6">
-        <StudentForm courses={courses} student={student} onSaved={() => setEditing(false)} />
+        <StudentForm courses={courses} groups={groups} student={student} onSaved={() => setEditing(false)} />
         <button onClick={() => setEditing(false)} className="btn-ghost w-full mt-2">
           Bekor qilish
         </button>
@@ -28,7 +30,8 @@ export function EditableStudentCard({
   }
 
   const rows = [
-    { icon: Phone, label: "Telefon", value: student.phone },
+    { icon: Phone, label: "Telefon 1", value: student.phone },
+    ...(student.phone2 ? [{ icon: Phone, label: "Telefon 2", value: student.phone2 }] : []),
     { icon: BookOpen, label: "Kurs", value: student.course?.name ?? "—" },
     { icon: BarChart3, label: "Daraja", value: levelLabel(student.level) },
     { icon: Users, label: "Guruh", value: student.group?.name ?? "Biriktirilmagan" },
