@@ -2,13 +2,19 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Users, Clock, Calendar } from "lucide-react";
+import { Search, Users, Clock, Calendar, UserCheck } from "lucide-react";
 import { levelLabel } from "@/lib/constants";
 import type { Group } from "@/lib/types";
 
 type GroupRow = Group & { course: { name: string } | null; students: { id: string }[] };
 
-export function GroupsList({ groups }: { groups: GroupRow[] }) {
+export function GroupsList({
+  groups,
+  individualCount = 0,
+}: {
+  groups: GroupRow[];
+  individualCount?: number;
+}) {
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
@@ -18,6 +24,8 @@ export function GroupsList({ groups }: { groups: GroupRow[] }) {
       (g) => g.name.toLowerCase().includes(q) || g.course?.name.toLowerCase().includes(q)
     );
   }, [groups, search]);
+
+  const showIndividualCard = individualCount > 0 && !search.trim();
 
   return (
     <div>
@@ -31,11 +39,28 @@ export function GroupsList({ groups }: { groups: GroupRow[] }) {
         />
       </div>
 
-      {filtered.length === 0 && (
+      {filtered.length === 0 && !showIndividualCard && (
         <div className="card p-10 text-center text-sm text-slate-400">Guruh topilmadi.</div>
       )}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {showIndividualCard && (
+          <Link href="/groups/individual" className="card p-5 hover:shadow-cardHover transition-shadow">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-semibold text-slate-900 truncate">Individual o'quvchilar</p>
+                <p className="text-xs text-slate-500 mt-0.5">Koreys tili · guruhsiz</p>
+              </div>
+              <span className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-success-50 text-success-600">
+                Kelaman
+              </span>
+            </div>
+            <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
+              <UserCheck className="w-3.5 h-3.5 text-slate-400" />
+              {individualCount} ta o'quvchi
+            </div>
+          </Link>
+        )}
         {filtered.map((g) => {
           const count = g.students?.length ?? 0;
           const full = count >= g.max_students;

@@ -106,6 +106,11 @@ export default async function DashboardPage() {
                       </Link>
                     ))}
                   </div>
+
+                  <Link href="/call/individual" className="btn-primary w-full mt-4">
+                    <PhoneCall className="w-4 h-4" />
+                    Telefon qilish va natijalarni kiritish
+                  </Link>
                 </div>
               )}
             </div>

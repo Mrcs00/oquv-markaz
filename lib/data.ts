@@ -177,6 +177,13 @@ export async function getIndividualWaiting(): Promise<StudentWithRelations[]> {
   return (data ?? []).map(normalizeStudent);
 }
 
+// Individual o'quvchidan telefon qilinib "Kelaman" natijasi olingan bo'lsa,
+// bu ro'yxat "Guruhlar" bo'limida alohida ko'rinadi.
+export async function getIndividualConfirmed(): Promise<StudentWithRelations[]> {
+  const students = await getIndividualWaiting();
+  return students.filter((s) => s.call_result?.result === "coming");
+}
+
 // ------------------------------------------------------------
 // DASHBOARD
 // ------------------------------------------------------------
