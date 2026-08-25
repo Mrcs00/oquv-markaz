@@ -29,8 +29,8 @@ export default async function DashboardPage() {
           <StatCard label="Jami o'quvchilar" value={stats.totalStudents} icon={UserCheck} tone="success" />
         </div>
 
-        {/* Guruhlarni yig'ish (0 dan boshlaydiganlar) */}
-        {stats.pools.length > 0 && (
+        {/* Guruhlarni yig'ish (0 dan boshlaydiganlar) + Individual kutayotganlar */}
+        {(stats.pools.length > 0 || stats.individualWaiting.length > 0) && (
           <section>
             <h2 className="text-sm font-semibold text-slate-900 mb-3">Guruhlarni yig'ish</h2>
             <div className="grid md:grid-cols-2 gap-4">
@@ -81,6 +81,33 @@ export default async function DashboardPage() {
                   </Link>
                 </div>
               ))}
+
+              {stats.individualWaiting.length > 0 && (
+                <div className="card p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-900">Individual</p>
+                      <p className="text-sm text-slate-500 mt-0.5">Daraja: 0 dan · guruhsiz</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600">
+                      {stats.individualWaiting.length} ta
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-1 max-h-48 overflow-y-auto">
+                    {stats.individualWaiting.map((s) => (
+                      <Link
+                        key={s.id}
+                        href={`/students/${s.id}`}
+                        className="flex items-center justify-between gap-2 py-2 px-2 -mx-2 rounded-lg hover:bg-slate-50 transition-colors"
+                      >
+                        <span className="text-sm text-slate-900 truncate">{s.full_name}</span>
+                        <span className="text-xs text-slate-400 shrink-0">{s.phone}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         )}

@@ -163,6 +163,20 @@ export async function getPoolByCourse(courseId: string): Promise<Pool | null> {
   return pools.find((p) => p.courseId === courseId) ?? null;
 }
 
+export async function getIndividualWaiting(): Promise<StudentWithRelations[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("students")
+    .select("*, course:courses(*), call_result:call_results(*)")
+    .eq("level", 0)
+    .is("group_id", null)
+    .is("deleted_at", null)
+    .eq("enrollment_type", "individual")
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map(normalizeStudent);
+}
+
 // ------------------------------------------------------------
 // DASHBOARD
 // ------------------------------------------------------------
@@ -170,7 +184,7 @@ export async function getPoolByCourse(courseId: string): Promise<Pool | null> {
 export async function getDashboardStats() {
   const supabase = createClient();
 
-  const [{ count: newStudents }, { count: activeGroups }, { count: totalStudents }, pools, recent] =
+  const [{ count: newStudents }, { count: activeGroups }, { count: totalStudents }, pools, individualWaiting, recent] =
     await Promise.all([
       supabase
         .from("students")
@@ -180,6 +194,7 @@ export async function getDashboardStats() {
       supabase.from("groups").select("id", { count: "exact", head: true }).eq("status", "faol"),
       supabase.from("students").select("id", { count: "exact", head: true }).is("deleted_at", null),
       getPools(),
+      getIndividualWaiting(),
       supabase
         .from("students")
         .select("*, course:courses(*), group:groups(*), call_result:call_results(*)")
@@ -198,6 +213,8 @@ export async function getDashboardStats() {
     // Barcha pool'lar (0 dan boshlaydiganlar) — hajmidan qat'i nazar,
     // administrator xohlagan payt telefon qilish jarayonini boshlashi mumkin.
     pools,
+    // Individual tarzda qo'shilgan, hali guruhga biriktirilmagan o'quvchilar.
+    individualWaiting,
     recentStudents: (recent.data ?? []).map(normalizeStudent),
   };
 }
