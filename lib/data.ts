@@ -132,6 +132,7 @@ export async function getPools(): Promise<Pool[]> {
     .eq("level", 0)
     .is("group_id", null)
     .is("deleted_at", null)
+    .eq("enrollment_type", "group")
     .order("created_at", { ascending: true });
 
   const students = (data ?? []).map(normalizeStudent);

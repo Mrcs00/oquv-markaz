@@ -45,6 +45,7 @@ export async function createStudent(_prevState: ActionResult, formData: FormData
         course_id,
         level: 0,
         status: "kutmoqda",
+        enrollment_type: "group",
       });
 
       if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
@@ -76,6 +77,7 @@ export async function createStudent(_prevState: ActionResult, formData: FormData
         level: group.min_level,
         group_id,
         status: "faol",
+        enrollment_type: "group",
       });
 
       if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
@@ -98,6 +100,7 @@ export async function createStudent(_prevState: ActionResult, formData: FormData
       course_id,
       level,
       status,
+      enrollment_type: "individual",
     });
 
     if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");

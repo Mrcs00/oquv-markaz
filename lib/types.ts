@@ -32,6 +32,7 @@ export interface Student {
   level: number;
   group_id: string | null;
   status: StudentStatus;
+  enrollment_type: "individual" | "group";
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
