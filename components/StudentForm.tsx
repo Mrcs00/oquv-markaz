@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Loader2, User, Phone, BookOpen, BarChart3, Users, Check } from "lucide-react";
+import { Loader2, User, Phone, BarChart3, Users, Check } from "lucide-react";
 import { createStudent, updateStudent } from "@/lib/actions";
 import { LEVELS, levelLabel } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
@@ -54,6 +54,9 @@ export function StudentForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
+
+  // Individual rejimda faqat "Koreys tili" kursi ishlatiladi.
+  const koreanCourse = courses.find((c) => c.name.toLowerCase().includes("koreys")) ?? courses[0];
 
   const openGroups = (groups ?? []).filter(
     (g) => g.status === "faol" && (g.students?.length ?? 0) < g.max_students
@@ -151,49 +154,26 @@ export function StudentForm({
       </div>
 
       {effectiveMode === "individual" ? (
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="label" htmlFor="course_id">
-              Kurs
-            </label>
-            <div className="relative">
-              <BookOpen className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <select
-                id="course_id"
-                name="course_id"
-                required
-                className="input pl-10"
-                defaultValue={student?.course_id ?? courses[0]?.id}
-              >
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="label" htmlFor="level">
-              Daraja
-            </label>
-            <div className="relative">
-              <BarChart3 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <select
-                id="level"
-                name="level"
-                required
-                className="input pl-10"
-                defaultValue={student?.level ?? 0}
-              >
-                {LEVELS.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div>
+          <input type="hidden" name="course_id" value={koreanCourse?.id ?? ""} />
+          <label className="label" htmlFor="level">
+            Daraja
+          </label>
+          <div className="relative">
+            <BarChart3 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <select
+              id="level"
+              name="level"
+              required
+              className="input pl-10"
+              defaultValue={student?.level ?? 0}
+            >
+              {LEVELS.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       ) : (
