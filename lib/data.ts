@@ -151,7 +151,7 @@ export async function getPools(): Promise<Pool[]> {
       courseName: list[0].course?.name ?? "Noma'lum kurs",
       count: list.length,
       ready: list.length >= READY_POOL_SIZE,
-      students: list.slice(0, READY_POOL_SIZE),
+      students: list,
     });
   }
 
