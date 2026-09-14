@@ -48,7 +48,10 @@ export default async function IndividualCallPage() {
           {students.map((s) => (
             <div key={s.id} className="p-4 space-y-2.5">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-medium text-slate-900 text-sm">{s.full_name}</p>
+                <div className="min-w-0">
+                  <p className="font-medium text-slate-900 text-sm">{s.full_name}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{s.course?.name ?? "—"}</p>
+                </div>
                 <CallLink phone={s.phone} />
               </div>
               <CallResultButtons studentId={s.id} currentResult={s.call_result?.result} />

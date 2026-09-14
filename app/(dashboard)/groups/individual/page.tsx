@@ -12,7 +12,7 @@ export default async function IndividualGroupPage() {
     <div>
       <PageHeader
         title="Individual o'quvchilar"
-        subtitle={`${students.length} ta o'quvchi · Koreys tili · guruhsiz`}
+        subtitle={`${students.length} ta o'quvchi · guruhsiz`}
         backHref="/groups"
       />
 
@@ -24,8 +24,11 @@ export default async function IndividualGroupPage() {
               href={`/students/${s.id}`}
               className="flex items-center justify-between gap-3 p-4 hover:bg-slate-50 transition-colors"
             >
-              <p className="font-medium text-slate-900 text-sm">{s.full_name}</p>
-              <span className="inline-flex items-center gap-1.5 text-sm text-slate-500">
+              <div className="min-w-0">
+                <p className="font-medium text-slate-900 text-sm">{s.full_name}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{s.course?.name ?? "—"}</p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-sm text-slate-500 shrink-0">
                 <Phone className="w-3.5 h-3.5" />
                 {s.phone}
               </span>

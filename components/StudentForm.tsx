@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Loader2, User, Phone, BarChart3, Users, Check } from "lucide-react";
+import { Loader2, User, Phone, BarChart3, Users, Check, GraduationCap } from "lucide-react";
 import { createStudent, updateStudent } from "@/lib/actions";
-import { LEVELS } from "@/lib/constants";
+import { getLevelsForCourse } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
 import type { Course, Group, Student } from "@/lib/types";
 
@@ -55,8 +55,13 @@ export function StudentForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
-  // Individual rejimda faqat "Koreys tili" kursi ishlatiladi.
-  const koreanCourse = courses.find((c) => c.name.toLowerCase().includes("koreys")) ?? courses[0];
+  // Individual rejimda o'quvchi qaysi kursga (til) yozilayotganini tanlaydi.
+  const [courseId, setCourseId] = useState(
+    student?.course_id ?? courses.find((c) => c.name.toLowerCase().includes("koreys"))?.id ?? courses[0]?.id ?? ""
+  );
+  const selectedCourse = courses.find((c) => c.id === courseId);
+  const levels = getLevelsForCourse(selectedCourse?.name);
+  const [groupId, setGroupId] = useState(student?.group_id ?? "");
 
   const openGroups = (groups ?? []).filter(
     (g) => g.status === "faol" && (g.students?.length ?? 0) < g.max_students
@@ -93,7 +98,7 @@ export function StudentForm({
         </div>
       )}
       <input type="hidden" name="mode" value={effectiveMode} />
-      <input type="hidden" name="course_id" value={koreanCourse?.id ?? ""} />
+      {effectiveMode === "group" && <input type="hidden" name="course_id" value={courseId} />}
 
       <div>
         <label className="label" htmlFor="full_name">
@@ -155,49 +160,105 @@ export function StudentForm({
       </div>
 
       {effectiveMode === "individual" ? (
-        <div>
-          <label className="label" htmlFor="level">
-            Daraja
-          </label>
-          <div className="relative">
-            <BarChart3 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <select
-              id="level"
-              name="level"
-              required
-              className="input pl-10"
-              defaultValue={student?.level ?? 0}
-            >
-              {LEVELS.map((l) => (
-                <option key={l.value} value={l.value}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
+        <>
+          <div>
+            <label className="label" htmlFor="course_id">
+              Kurs
+            </label>
+            <div className="relative">
+              <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select
+                id="course_id"
+                name="course_id"
+                required
+                className="input pl-10"
+                value={courseId}
+                onChange={(e) => setCourseId(e.target.value)}
+              >
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
+
+          <div>
+            <label className="label" htmlFor="level">
+              Daraja
+            </label>
+            <div className="relative">
+              <BarChart3 className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select
+                key={courseId}
+                id="level"
+                name="level"
+                required
+                className="input pl-10"
+                defaultValue={levels.some((l) => l.value === student?.level) ? student?.level : 0}
+              >
+                {levels.map((l) => (
+                  <option key={l.value} value={l.value}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </>
       ) : (
-        <div>
-          <label className="label" htmlFor="group_id">
-            Guruh
-          </label>
-          <div className="relative">
-            <Users className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <select
-              id="group_id"
-              name="group_id"
-              className="input pl-10"
-              defaultValue={student?.group_id ?? ""}
-            >
-              <option value="">0 dan</option>
-              {openGroups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
+        <>
+          <div>
+            <label className="label" htmlFor="course_id_pool">
+              Kurs
+            </label>
+            <div className="relative">
+              <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select
+                id="course_id_pool"
+                className="input pl-10"
+                value={courseId}
+                onChange={(e) => {
+                  setCourseId(e.target.value);
+                  setGroupId("");
+                }}
+              >
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
+
+          <div>
+            <label className="label" htmlFor="group_id">
+              Guruh
+            </label>
+            <div className="relative">
+              <Users className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select
+                key={courseId}
+                id="group_id"
+                name="group_id"
+                className="input pl-10"
+                defaultValue={student?.group_id ?? ""}
+                onChange={(e) => setGroupId(e.target.value)}
+              >
+                <option value="">0 dan</option>
+                {openGroups
+                  .filter((g) => g.course_id === courseId)
+                  .map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+        </>
       )}
 
       <SubmitButton label="Saqlash" />

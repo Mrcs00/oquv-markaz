@@ -14,6 +14,15 @@ export function levelLabel(level: number): string {
   return LEVELS.find((l) => l.value === level)?.label ?? `${level}-daraja`;
 }
 
+// Har bir kursning o'z daraja tizimi bo'lishi mumkin. Hozircha faqat
+// Koreys tili uchun to'liq (1A-3B) tizim bor; boshqa kurslarda (masalan,
+// Xitoy tili) hali daraja tizimi joriy qilinmagan — shuning uchun ular
+// uchun faqat "0 dan" ko'rsatiladi.
+export function getLevelsForCourse(courseName?: string | null) {
+  if (courseName?.toLowerCase().includes("koreys")) return LEVELS;
+  return LEVELS.filter((l) => l.value === 0);
+}
+
 export const WEEKDAYS = ["Du", "Se", "Chor", "Pay", "Jum", "Shan", "Yak"] as const;
 
 export const READY_POOL_SIZE = 10;

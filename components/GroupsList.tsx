@@ -49,7 +49,7 @@ export function GroupsList({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="font-semibold text-slate-900 truncate">Individual o'quvchilar</p>
-                <p className="text-xs text-slate-500 mt-0.5">Koreys tili · guruhsiz</p>
+                <p className="text-xs text-slate-500 mt-0.5">guruhsiz</p>
               </div>
               <span className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-success-50 text-success-600">
                 Kelaman

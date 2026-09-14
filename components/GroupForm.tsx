@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Loader2, Phone } from "lucide-react";
 import { createGroup } from "@/lib/actions";
-import { LEVELS, WEEKDAYS } from "@/lib/constants";
+import { getLevelsForCourse, WEEKDAYS } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
 import type { Course } from "@/lib/types";
 
@@ -37,6 +37,9 @@ export function GroupForm({
 }) {
   const [state, formAction] = useFormState(createGroup, initialState);
   const { showToast } = useToast();
+  const [courseId, setCourseId] = useState(defaultCourseId ?? courses[0]?.id ?? "");
+  const selectedCourse = courses.find((c) => c.id === courseId);
+  const levels = getLevelsForCourse(selectedCourse?.name);
   const [days, setDays] = useState<string[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -74,7 +77,8 @@ export function GroupForm({
             name="course_id"
             required
             className="input disabled:opacity-60 disabled:bg-slate-50"
-            defaultValue={defaultCourseId ?? courses[0]?.id}
+            value={courseId}
+            onChange={(e) => setCourseId(e.target.value)}
             disabled={isFromCall}
           >
             {courses.map((c) => (
@@ -105,14 +109,15 @@ export function GroupForm({
             Daraja (dan)
           </label>
           <select
+            key={`min-${courseId}`}
             id="min_level"
             name="min_level"
             required
             className="input disabled:opacity-60 disabled:bg-slate-50"
-            defaultValue={defaultMinLevel ?? 0}
+            defaultValue={levels.some((l) => l.value === defaultMinLevel) ? defaultMinLevel : 0}
             disabled={isFromCall}
           >
-            {LEVELS.map((l) => (
+            {levels.map((l) => (
               <option key={l.value} value={l.value}>
                 {l.label}
               </option>
@@ -125,14 +130,15 @@ export function GroupForm({
             Daraja (gacha)
           </label>
           <select
+            key={`max-${courseId}`}
             id="max_level"
             name="max_level"
             required
             className="input disabled:opacity-60 disabled:bg-slate-50"
-            defaultValue={defaultMaxLevel ?? 0}
+            defaultValue={levels.some((l) => l.value === defaultMaxLevel) ? defaultMaxLevel : 0}
             disabled={isFromCall}
           >
-            {LEVELS.map((l) => (
+            {levels.map((l) => (
               <option key={l.value} value={l.value}>
                 {l.label}
               </option>
