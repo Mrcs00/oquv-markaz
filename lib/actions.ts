@@ -256,6 +256,17 @@ export async function setCallResult(studentId: string, result: CallResultValue, 
 
   if (error) return fail("Telefon natijasini saqlashda xatolik yuz berdi.");
 
+  // "Kelmayman" yoki "Telefonni ko'tarmadi" natijasi chiqsa, o'quvchi
+  // avtomatik "O'chirilganlar" bo'limiga o'tkaziladi.
+  if (result === "not_coming" || result === "no_answer") {
+    await supabase
+      .from("students")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", studentId);
+    revalidatePath("/students");
+    revalidatePath("/deleted");
+  }
+
   revalidatePath("/call", "layout");
   revalidatePath("/");
   return { success: true };

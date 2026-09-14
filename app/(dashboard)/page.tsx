@@ -133,7 +133,7 @@ export default async function DashboardPage() {
             {stats.recentStudents.map((s) => (
               <Link
                 key={s.id}
-                href={`/students/${s.id}`}
+                href={s.status === "faol" && s.group_id ? `/groups/${s.group_id}` : `/students/${s.id}`}
                 className="flex items-center justify-between gap-3 p-4 hover:bg-slate-50 transition-colors"
               >
                 <div className="min-w-0">
