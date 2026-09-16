@@ -5,6 +5,7 @@ import { Loader2, Users } from "lucide-react";
 import { addStudentToGroup, removeStudentFromGroup } from "@/lib/actions";
 import { useToast } from "@/components/ToastProvider";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { SHIFT_META } from "@/lib/constants";
 import type { Group } from "@/lib/types";
 
 export function MatchingGroupsList({
@@ -36,12 +37,15 @@ export function MatchingGroupsList({
 
   return (
     <div className="space-y-3">
-      {groups.map((g) => (
+      {groups.map((g) => {
+        const shiftMeta = SHIFT_META[g.shift];
+        return (
         <div key={g.id} className="card p-4 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="font-medium text-slate-900 text-sm truncate">{g.name}</p>
             <p className="text-xs text-slate-500 mt-0.5">
-              {g.currentCount} / {g.max_students} o'quvchi · {g.schedule_time}
+              {g.currentCount} / {g.max_students} o'quvchi ·{" "}
+              {shiftMeta ? `${shiftMeta.emoji} ${shiftMeta.label} · ${shiftMeta.korean}` : g.schedule_time}
             </p>
           </div>
           <button
@@ -53,7 +57,8 @@ export function MatchingGroupsList({
             Qo'shish
           </button>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

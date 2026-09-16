@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, Users, Clock, Calendar, UserCheck } from "lucide-react";
-import { levelLabel } from "@/lib/constants";
+import { levelLabel, SHIFT_META } from "@/lib/constants";
 import type { Group } from "@/lib/types";
 
 type GroupRow = Group & { course: { name: string } | null; students: { id: string }[] };
@@ -68,6 +68,7 @@ export function GroupsList({
             g.min_level === g.max_level
               ? levelLabel(g.min_level)
               : `${levelLabel(g.min_level)} – ${levelLabel(g.max_level)}`;
+          const shiftMeta = SHIFT_META[g.shift];
 
           return (
             <Link key={g.id} href={`/groups/${g.id}`} className="card p-5 hover:shadow-cardHover transition-shadow">
@@ -98,7 +99,9 @@ export function GroupsList({
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  {g.schedule_time || "—"}
+                  {shiftMeta
+                    ? `${shiftMeta.emoji} ${shiftMeta.label} · ${shiftMeta.korean} (${shiftMeta.range})`
+                    : g.schedule_time || "—"}
                 </div>
               </div>
 

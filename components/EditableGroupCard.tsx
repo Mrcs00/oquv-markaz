@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Pencil, Loader2, Users, Clock, Calendar, BarChart3 } from "lucide-react";
 import { updateGroup } from "@/lib/actions";
-import { WEEKDAYS, levelLabel } from "@/lib/constants";
+import { WEEKDAYS, SHIFTS, SHIFT_META, levelLabel } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
-import type { Group } from "@/lib/types";
+import type { Group, GroupShift } from "@/lib/types";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -21,6 +21,7 @@ function SubmitButton() {
 export function EditableGroupCard({ group, courseName }: { group: Group; courseName: string }) {
   const [editing, setEditing] = useState(false);
   const [days, setDays] = useState<string[]>(group.schedule_days ?? []);
+  const [shift, setShift] = useState<GroupShift>(group.shift ?? "kunduzgi");
   const action = updateGroup.bind(null, group.id);
   const [state, formAction] = useFormState(action, {});
   const { showToast } = useToast();
@@ -79,21 +80,44 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
               <input key={d} type="hidden" name="schedule_days" value={d} />
             ))}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label">Dars vaqti</label>
-              <input name="schedule_time" type="time" className="input" defaultValue={group.schedule_time} />
+          <div>
+            <label className="label">Smena</label>
+            <div className="grid grid-cols-2 gap-2">
+              {SHIFTS.map((s) => {
+                const meta = SHIFT_META[s];
+                const active = shift === s;
+                return (
+                  <button
+                    type="button"
+                    key={s}
+                    onClick={() => setShift(s)}
+                    className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2.5 text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-primary-500 border-primary-500 text-slate-900"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>
+                      {meta.emoji} {meta.label} · {meta.korean}
+                    </span>
+                    <span className={`text-xs ${active ? "text-slate-800" : "text-slate-400"}`}>
+                      {meta.range}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <div>
-              <label className="label">Maks. o'quvchi</label>
-              <input
-                name="max_students"
-                type="number"
-                min={1}
-                className="input"
-                defaultValue={group.max_students}
-              />
-            </div>
+            <input type="hidden" name="shift" value={shift} />
+          </div>
+          <div>
+            <label className="label">Maks. o'quvchi</label>
+            <input
+              name="max_students"
+              type="number"
+              min={1}
+              className="input"
+              defaultValue={group.max_students}
+            />
           </div>
           <SubmitButton />
           <button type="button" onClick={() => setEditing(false)} className="btn-ghost w-full">
@@ -104,11 +128,16 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
     );
   }
 
+  const shiftMeta = SHIFT_META[group.shift];
   const rows = [
     { icon: BarChart3, label: "Kurs / Daraja", value: `${courseName} · ${levelText}` },
     { icon: Users, label: "O'qituvchi", value: group.teacher_name || "—" },
     { icon: Calendar, label: "Dars kunlari", value: group.schedule_days?.join(" / ") || "—" },
-    { icon: Clock, label: "Dars vaqti", value: group.schedule_time || "—" },
+    {
+      icon: Clock,
+      label: "Smena",
+      value: shiftMeta ? `${shiftMeta.emoji} ${shiftMeta.label} · ${shiftMeta.korean} (${shiftMeta.range})` : "—",
+    },
   ];
 
   return (

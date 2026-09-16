@@ -1,4 +1,4 @@
-import type { CallResultValue, StudentStatus } from "@/lib/types";
+import type { CallResultValue, GroupShift, StudentStatus } from "@/lib/types";
 
 export const LEVELS = [
   { value: 0, label: "0 dan" },
@@ -24,6 +24,31 @@ export function getLevelsForCourse(courseName?: string | null) {
 }
 
 export const WEEKDAYS = ["Du", "Se", "Chor", "Pay", "Jum", "Shan", "Yak"] as const;
+
+// Guruhlar ikki fixed smenadan birida ochiladi. Har bir smenaning
+// vaqt oralig'i qat'iy (belgilangan) — o'qituvchi faqat smenani tanlaydi,
+// aniq soat kiritmaydi. schedule_time shu yerdan avtomatik olinadi.
+export const SHIFT_META: Record<
+  GroupShift,
+  { label: string; korean: string; range: string; startTime: string; emoji: string }
+> = {
+  ertalabki: {
+    label: "Ertalabki",
+    korean: "오전",
+    range: "08:00–12:00",
+    startTime: "08:00",
+    emoji: "🌅",
+  },
+  kunduzgi: {
+    label: "Kunduzgi",
+    korean: "오후",
+    range: "13:00–18:00",
+    startTime: "13:00",
+    emoji: "☀️",
+  },
+};
+
+export const SHIFTS: GroupShift[] = ["ertalabki", "kunduzgi"];
 
 export const READY_POOL_SIZE = 10;
 

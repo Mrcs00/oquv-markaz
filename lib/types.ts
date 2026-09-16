@@ -1,6 +1,8 @@
 export type StudentStatus = "kutmoqda" | "guruh_kutmoqda" | "faol";
 export type CallResultValue = "coming" | "no_answer" | "not_coming" | "call_later";
 export type GroupStatus = "faol" | "yopiq";
+// ertalabki -> 오전 (08:00-12:00), kunduzgi -> 오후 (13:00-18:00)
+export type GroupShift = "ertalabki" | "kunduzgi";
 
 export interface Course {
   id: string;
@@ -17,6 +19,7 @@ export interface Group {
   teacher_name: string;
   schedule_days: string[];
   schedule_time: string;
+  shift: GroupShift;
   max_students: number;
   status: GroupStatus;
   created_at: string;
@@ -77,6 +80,7 @@ export interface Database {
           course_id: string;
           min_level: number;
           max_level: number;
+          shift: GroupShift;
         };
         Update: Partial<Group>;
       };

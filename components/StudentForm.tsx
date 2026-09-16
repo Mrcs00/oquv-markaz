@@ -5,7 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Loader2, User, Phone, BarChart3, Users, Check, GraduationCap } from "lucide-react";
 import { createStudent, updateStudent } from "@/lib/actions";
-import { getLevelsForCourse } from "@/lib/constants";
+import { getLevelsForCourse, SHIFT_META } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
 import type { Course, Group, Student } from "@/lib/types";
 
@@ -250,11 +250,15 @@ export function StudentForm({
                 <option value="">0 dan</option>
                 {openGroups
                   .filter((g) => g.course_id === courseId)
-                  .map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name}
-                    </option>
-                  ))}
+                  .map((g) => {
+                    const shiftMeta = SHIFT_META[g.shift];
+                    return (
+                      <option key={g.id} value={g.id}>
+                        {g.name}
+                        {shiftMeta ? ` · ${shiftMeta.emoji} ${shiftMeta.label} (${shiftMeta.korean})` : ""}
+                      </option>
+                    );
+                  })}
               </select>
             </div>
           </div>

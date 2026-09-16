@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { CallResultValue } from "@/lib/types";
+import type { CallResultValue, GroupShift } from "@/lib/types";
+import { SHIFT_META } from "@/lib/constants";
 
 export type ActionResult = { success?: boolean; error?: string };
 
@@ -284,7 +285,7 @@ export async function createGroup(_prevState: ActionResult, formData: FormData):
   const min_level = Number(formData.get("min_level"));
   const max_level = Number(formData.get("max_level"));
   const teacher_name = String(formData.get("teacher_name") || "").trim();
-  const schedule_time = String(formData.get("schedule_time") || "").trim();
+  const shift = String(formData.get("shift") || "") as GroupShift;
   const max_students = Number(formData.get("max_students") || 12);
   const schedule_days = formData.getAll("schedule_days").map(String);
   const studentIds = formData.getAll("student_ids").map(String);
@@ -292,6 +293,13 @@ export async function createGroup(_prevState: ActionResult, formData: FormData):
   if (!name || !course_id || Number.isNaN(min_level) || Number.isNaN(max_level)) {
     return fail("Guruh ma'lumotlarini to'liq kiriting.");
   }
+  if (shift !== "ertalabki" && shift !== "kunduzgi") {
+    return fail("Smenani tanlang: ertalabki (오전) yoki kunduzgi (오후).");
+  }
+
+  // Dars vaqti smenaga qarab avtomatik belgilanadi — o'qituvchi aniq
+  // soat kiritmaydi, faqat 오전/오후 smenasini tanlaydi.
+  const schedule_time = SHIFT_META[shift].startTime;
 
   const { data: newGroup, error } = await supabase
     .from("groups")
@@ -302,6 +310,7 @@ export async function createGroup(_prevState: ActionResult, formData: FormData):
       max_level,
       teacher_name,
       schedule_time,
+      shift,
       schedule_days,
       max_students,
     })
@@ -334,13 +343,18 @@ export async function updateGroup(
 
   const name = String(formData.get("name") || "").trim();
   const teacher_name = String(formData.get("teacher_name") || "").trim();
-  const schedule_time = String(formData.get("schedule_time") || "").trim();
+  const shift = String(formData.get("shift") || "") as GroupShift;
   const max_students = Number(formData.get("max_students") || 12);
   const schedule_days = formData.getAll("schedule_days").map(String);
 
+  if (shift !== "ertalabki" && shift !== "kunduzgi") {
+    return fail("Smenani tanlang: ertalabki (오전) yoki kunduzgi (오후).");
+  }
+  const schedule_time = SHIFT_META[shift].startTime;
+
   const { error } = await supabase
     .from("groups")
-    .update({ name, teacher_name, schedule_time, max_students, schedule_days })
+    .update({ name, teacher_name, schedule_time, shift, max_students, schedule_days })
     .eq("id", groupId);
 
   if (error) return fail("Guruhni yangilashda xatolik yuz berdi.");

@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Loader2, Phone } from "lucide-react";
 import { createGroup } from "@/lib/actions";
-import { getLevelsForCourse, WEEKDAYS } from "@/lib/constants";
+import { getLevelsForCourse, WEEKDAYS, SHIFTS, SHIFT_META } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
-import type { Course } from "@/lib/types";
+import type { Course, GroupShift } from "@/lib/types";
 
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -41,6 +41,7 @@ export function GroupForm({
   const selectedCourse = courses.find((c) => c.id === courseId);
   const levels = getLevelsForCourse(selectedCourse?.name);
   const [days, setDays] = useState<string[]>([]);
+  const [shift, setShift] = useState<GroupShift>("kunduzgi");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -176,26 +177,48 @@ export function GroupForm({
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="label" htmlFor="schedule_time">
-            Dars vaqti
-          </label>
-          <input id="schedule_time" name="schedule_time" type="time" className="input" defaultValue="18:00" />
+      <div>
+        <label className="label">Smena</label>
+        <div className="grid grid-cols-2 gap-2">
+          {SHIFTS.map((s) => {
+            const meta = SHIFT_META[s];
+            const active = shift === s;
+            return (
+              <button
+                type="button"
+                key={s}
+                onClick={() => setShift(s)}
+                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2.5 text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-primary-500 border-primary-500 text-slate-900"
+                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                <span>
+                  {meta.emoji} {meta.label} · {meta.korean}
+                </span>
+                <span className={`text-xs ${active ? "text-slate-800" : "text-slate-400"}`}>
+                  {meta.range}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div>
-          <label className="label" htmlFor="max_students">
-            Maksimal o'quvchi
-          </label>
-          <input
-            id="max_students"
-            name="max_students"
-            type="number"
-            min={1}
-            className="input"
-            defaultValue={12}
-          />
-        </div>
+        <input type="hidden" name="shift" value={shift} />
+      </div>
+
+      <div>
+        <label className="label" htmlFor="max_students">
+          Maksimal o'quvchi
+        </label>
+        <input
+          id="max_students"
+          name="max_students"
+          type="number"
+          min={1}
+          className="input"
+          defaultValue={12}
+        />
       </div>
 
       {presetStudents && presetStudents.length > 0 && (
