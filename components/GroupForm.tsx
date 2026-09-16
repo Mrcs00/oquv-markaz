@@ -181,32 +181,40 @@ export function GroupForm({
 
       <div>
         <label className="label">Smena</label>
-        <div className="grid grid-cols-2 gap-2">
-          {SHIFTS.map((s) => {
-            const meta = SHIFT_META[s];
-            const active = shift === s;
-            return (
-              <button
-                type="button"
-                key={s}
-                disabled={isFromCall}
-                onClick={() => setShift(s)}
-                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed ${
-                  active
-                    ? "bg-primary-500 border-primary-500 text-slate-900"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-60 disabled:hover:bg-white"
-                }`}
-              >
-                <span>
-                  {meta.emoji} {meta.label} · {meta.korean}
-                </span>
-                <span className={`text-xs ${active ? "text-slate-800" : "text-slate-400"}`}>
-                  {meta.range}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {isFromCall ? (
+          <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5">
+            <span className="text-sm font-medium text-slate-600">
+              {SHIFT_META[shift].emoji} {SHIFT_META[shift].label} · {SHIFT_META[shift].korean}
+            </span>
+            <span className="text-xs text-slate-400">{SHIFT_META[shift].range}</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {SHIFTS.map((s) => {
+              const meta = SHIFT_META[s];
+              const active = shift === s;
+              return (
+                <button
+                  type="button"
+                  key={s}
+                  onClick={() => setShift(s)}
+                  className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-primary-500 border-primary-500 text-slate-900"
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  <span>
+                    {meta.emoji} {meta.label} · {meta.korean}
+                  </span>
+                  <span className={`text-xs ${active ? "text-slate-800" : "text-slate-400"}`}>
+                    {meta.range}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
         {isFromCall && (
           <p className="text-xs text-slate-400 mt-1.5">
             Smena o'quvchilar qo'shilganda tanlangan — bu yerda o'zgartirilmaydi.
