@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Pencil, Loader2, Users, Clock, Calendar, BarChart3 } from "lucide-react";
-import { updateGroup } from "@/lib/actions";
-import { WEEKDAYS, SHIFTS, SHIFT_META, levelLabel } from "@/lib/constants";
+import { Pencil, Loader2, Users, Clock, Calendar, BarChart3, PlayCircle } from "lucide-react";
+import { updateGroup, openGroupManually } from "@/lib/actions";
+import { WEEKDAYS, SHIFTS, SHIFT_META, GROUP_STATUS_META, levelLabel } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
 import type { Group, GroupShift } from "@/lib/types";
 
@@ -25,6 +25,15 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
   const action = updateGroup.bind(null, group.id);
   const [state, formAction] = useFormState(action, {});
   const { showToast } = useToast();
+  const [isOpening, startOpening] = useTransition();
+
+  function handleOpenGroup() {
+    startOpening(async () => {
+      const result = await openGroupManually(group.id);
+      if (result?.error) showToast(result.error, "error");
+      else showToast("Guruh ochildi va faollashtirildi.", "success");
+    });
+  }
 
   useEffect(() => {
     if (state && "success" in state && state.success) {
@@ -129,6 +138,7 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
   }
 
   const shiftMeta = SHIFT_META[group.shift];
+  const statusMeta = GROUP_STATUS_META[group.status];
   const rows = [
     { icon: BarChart3, label: "Kurs / Daraja", value: `${courseName} · ${levelText}` },
     { icon: Users, label: "O'qituvchi", value: group.teacher_name || "—" },
@@ -143,7 +153,14 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
   return (
     <div className="card p-5 md:p-6">
       <div className="flex items-start justify-between gap-3 mb-5">
-        <h2 className="font-semibold text-slate-900 text-lg">{group.name}</h2>
+        <div className="min-w-0">
+          <h2 className="font-semibold text-slate-900 text-lg truncate">{group.name}</h2>
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium mt-1.5 ${statusMeta.className}`}
+          >
+            {statusMeta.label}
+          </span>
+        </div>
         <button onClick={() => setEditing(true)} className="btn-secondary shrink-0">
           <Pencil className="w-3.5 h-3.5" />
           Tahrirlash
@@ -158,6 +175,17 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
           </div>
         ))}
       </dl>
+      {group.status === "yigilmoqda" && (
+        <button
+          type="button"
+          disabled={isOpening}
+          onClick={handleOpenGroup}
+          className="btn-success w-full mt-5"
+        >
+          {isOpening ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
+          Guruhni ochish (to'lmagan holda ham)
+        </button>
+      )}
     </div>
   );
 }

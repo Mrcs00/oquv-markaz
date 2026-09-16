@@ -12,6 +12,32 @@ function fail(message: string): ActionResult {
   return { error: message };
 }
 
+// Guruh "yigilmoqda" holatida bo'lsa va o'quvchilar soni max_students'ga
+// yetsa, uni avtomatik "faol"ga o'tkazadi. Har safar guruhga o'quvchi
+// qo'shilgandan keyin chaqiriladi.
+async function maybeActivateGroup(
+  supabase: ReturnType<typeof createClient>,
+  groupId: string
+): Promise<void> {
+  const { data: group } = await supabase
+    .from("groups")
+    .select("id, status, max_students")
+    .eq("id", groupId)
+    .single();
+
+  if (!group || group.status !== "yigilmoqda") return;
+
+  const { count } = await supabase
+    .from("students")
+    .select("id", { count: "exact", head: true })
+    .eq("group_id", groupId)
+    .is("deleted_at", null);
+
+  if ((count ?? 0) >= group.max_students) {
+    await supabase.from("groups").update({ status: "faol" }).eq("id", groupId);
+  }
+}
+
 // ------------------------------------------------------------
 // STUDENTS
 // ------------------------------------------------------------
@@ -82,6 +108,7 @@ export async function createStudent(_prevState: ActionResult, formData: FormData
       });
 
       if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
+      await maybeActivateGroup(supabase, group_id);
     }
   } else {
     // Individual: kurs va daraja bo'yicha, guruhsiz saqlanadi.
@@ -236,6 +263,7 @@ export async function addStudentToGroup(studentId: string, groupId: string): Pro
     .eq("id", studentId);
 
   if (error) return fail("O'quvchini guruhga qo'shishda xatolik yuz berdi.");
+  await maybeActivateGroup(supabase, groupId);
 
   revalidatePath("/groups");
   revalidatePath("/students");
@@ -313,6 +341,7 @@ export async function createGroup(_prevState: ActionResult, formData: FormData):
       shift,
       schedule_days,
       max_students,
+      status: "yigilmoqda",
     })
     .select("id")
     .single();
@@ -326,6 +355,7 @@ export async function createGroup(_prevState: ActionResult, formData: FormData):
       .in("id", studentIds);
 
     if (assignError) return fail("O'quvchilarni guruhga biriktirishda xatolik yuz berdi.");
+    await maybeActivateGroup(supabase, newGroup.id);
   }
 
   revalidatePath("/groups");
@@ -361,6 +391,26 @@ export async function updateGroup(
 
   revalidatePath("/groups");
   revalidatePath(`/groups/${groupId}`);
+  return { success: true };
+}
+
+// Administrator "yigilmoqda" guruhni to'lmagan holda ham qo'lda ochishi
+// (faollashtirishi) mumkin — masalan darslarni to'lguncha kutmasdan
+// boshlamoqchi bo'lsa.
+export async function openGroupManually(groupId: string): Promise<ActionResult> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("groups")
+    .update({ status: "faol" })
+    .eq("id", groupId)
+    .eq("status", "yigilmoqda");
+
+  if (error) return fail("Guruhni ochishda xatolik yuz berdi.");
+
+  revalidatePath("/groups");
+  revalidatePath(`/groups/${groupId}`);
+  revalidatePath("/");
   return { success: true };
 }
 

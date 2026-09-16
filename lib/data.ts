@@ -97,13 +97,14 @@ export async function getGroupById(id: string): Promise<GroupDetail | null> {
 }
 
 // Guruhlar — bilimi bor o'quvchiga mos keladigan, joy bor guruhlar
+// (hali yig'ilayotgan yoki allaqachon faol — yopiq bo'lmasa bo'lgani)
 export async function getMatchingGroups(courseId: string, level: number) {
   const supabase = createClient();
   const { data } = await supabase
     .from("groups")
     .select("*, course:courses(*), students:students(id)")
     .eq("course_id", courseId)
-    .eq("status", "faol")
+    .in("status", ["yigilmoqda", "faol"])
     .lte("min_level", level)
     .gte("max_level", level);
 
@@ -163,6 +164,27 @@ export async function getPoolByCourse(courseId: string): Promise<Pool | null> {
   return pools.find((p) => p.courseId === courseId) ?? null;
 }
 
+// Allaqachon ochilgan, lekin hali to'lmagan ("yigilmoqda") haqiqiy
+// guruhlar — bosh sahifada alohida ko'rsatiladi.
+export interface GatheringGroup extends Group {
+  course: Course | null;
+  currentCount: number;
+}
+
+export async function getGatheringGroups(): Promise<GatheringGroup[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("groups")
+    .select("*, course:courses(*), students:students(id)")
+    .eq("status", "yigilmoqda")
+    .order("created_at", { ascending: true });
+
+  return (data ?? []).map((g: any) => ({
+    ...g,
+    currentCount: g.students?.length ?? 0,
+  }));
+}
+
 export async function getIndividualWaiting(): Promise<StudentWithRelations[]> {
   const supabase = createClient();
   const { data } = await supabase
@@ -191,24 +213,32 @@ export async function getIndividualConfirmed(): Promise<StudentWithRelations[]> 
 export async function getDashboardStats() {
   const supabase = createClient();
 
-  const [{ count: newStudents }, { count: activeGroups }, { count: totalStudents }, pools, individualWaiting, recent] =
-    await Promise.all([
-      supabase
-        .from("students")
-        .select("id", { count: "exact", head: true })
-        .is("deleted_at", null)
-        .in("status", ["kutmoqda", "guruh_kutmoqda"]),
-      supabase.from("groups").select("id", { count: "exact", head: true }).eq("status", "faol"),
-      supabase.from("students").select("id", { count: "exact", head: true }).is("deleted_at", null),
-      getPools(),
-      getIndividualWaiting(),
-      supabase
-        .from("students")
-        .select("*, course:courses(*), group:groups(*), call_result:call_results(*)")
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false })
-        .limit(5),
-    ]);
+  const [
+    { count: newStudents },
+    { count: activeGroups },
+    { count: totalStudents },
+    pools,
+    gatheringGroups,
+    individualWaiting,
+    recent,
+  ] = await Promise.all([
+    supabase
+      .from("students")
+      .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
+      .in("status", ["kutmoqda", "guruh_kutmoqda"]),
+    supabase.from("groups").select("id", { count: "exact", head: true }).eq("status", "faol"),
+    supabase.from("students").select("id", { count: "exact", head: true }).is("deleted_at", null),
+    getPools(),
+    getGatheringGroups(),
+    getIndividualWaiting(),
+    supabase
+      .from("students")
+      .select("*, course:courses(*), group:groups(*), call_result:call_results(*)")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
 
   const readyPools = pools.filter((p) => p.ready);
 
@@ -220,6 +250,8 @@ export async function getDashboardStats() {
     // Barcha pool'lar (0 dan boshlaydiganlar) — hajmidan qat'i nazar,
     // administrator xohlagan payt telefon qilish jarayonini boshlashi mumkin.
     pools,
+    // Haqiqiy guruhlar — ochilgan, lekin hali to'lmagan ("yigilmoqda").
+    gatheringGroups,
     // Individual tarzda qo'shilgan, hali guruhga biriktirilmagan o'quvchilar.
     individualWaiting,
     recentStudents: (recent.data ?? []).map(normalizeStudent),

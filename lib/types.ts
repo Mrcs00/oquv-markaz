@@ -1,6 +1,6 @@
 export type StudentStatus = "kutmoqda" | "guruh_kutmoqda" | "faol";
 export type CallResultValue = "coming" | "no_answer" | "not_coming" | "call_later";
-export type GroupStatus = "faol" | "yopiq";
+export type GroupStatus = "yigilmoqda" | "faol" | "yopiq";
 // ertalabki -> 오전 (08:00-12:00), kunduzgi -> 오후 (13:00-18:00)
 export type GroupShift = "ertalabki" | "kunduzgi";
 

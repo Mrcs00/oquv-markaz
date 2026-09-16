@@ -1,4 +1,4 @@
-import type { CallResultValue, GroupShift, StudentStatus } from "@/lib/types";
+import type { CallResultValue, GroupShift, GroupStatus, StudentStatus } from "@/lib/types";
 
 export const LEVELS = [
   { value: 0, label: "0 dan" },
@@ -49,6 +49,12 @@ export const SHIFT_META: Record<
 };
 
 export const SHIFTS: GroupShift[] = ["ertalabki", "kunduzgi"];
+
+export const GROUP_STATUS_META: Record<GroupStatus, { label: string; className: string }> = {
+  yigilmoqda: { label: "Yig'ilmoqda", className: "bg-primary-50 text-primary-700" },
+  faol: { label: "Faol", className: "bg-success-50 text-success-600" },
+  yopiq: { label: "Yopiq", className: "bg-slate-100 text-slate-500" },
+};
 
 export const READY_POOL_SIZE = 10;
 

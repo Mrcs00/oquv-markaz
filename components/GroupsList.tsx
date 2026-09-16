@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, Users, Clock, Calendar, UserCheck } from "lucide-react";
-import { levelLabel, SHIFT_META } from "@/lib/constants";
+import { levelLabel, SHIFT_META, GROUP_STATUS_META } from "@/lib/constants";
 import type { Group } from "@/lib/types";
 
 type GroupRow = Group & { course: { name: string } | null; students: { id: string }[] };
@@ -69,6 +69,10 @@ export function GroupsList({
               ? levelLabel(g.min_level)
               : `${levelLabel(g.min_level)} – ${levelLabel(g.max_level)}`;
           const shiftMeta = SHIFT_META[g.shift];
+          const statusMeta = GROUP_STATUS_META[g.status];
+          const badgeLabel = full && g.status !== "yopiq" ? "To'liq" : statusMeta.label;
+          const badgeClassName =
+            full && g.status !== "yopiq" ? "bg-danger-50 text-danger-600" : statusMeta.className;
 
           return (
             <Link key={g.id} href={`/groups/${g.id}`} className="card p-5 hover:shadow-cardHover transition-shadow">
@@ -80,11 +84,9 @@ export function GroupsList({
                   </p>
                 </div>
                 <span
-                  className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
-                    full ? "bg-danger-50 text-danger-600" : "bg-success-50 text-success-600"
-                  }`}
+                  className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${badgeClassName}`}
                 >
-                  {full ? "To'liq" : "Faol"}
+                  {badgeLabel}
                 </span>
               </div>
 

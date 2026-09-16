@@ -5,7 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Loader2, User, Phone, BarChart3, Users, Check, GraduationCap } from "lucide-react";
 import { createStudent, updateStudent } from "@/lib/actions";
-import { getLevelsForCourse, SHIFT_META } from "@/lib/constants";
+import { getLevelsForCourse, SHIFT_META, GROUP_STATUS_META } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
 import type { Course, Group, Student } from "@/lib/types";
 
@@ -64,7 +64,7 @@ export function StudentForm({
   const [groupId, setGroupId] = useState(student?.group_id ?? "");
 
   const openGroups = (groups ?? []).filter(
-    (g) => g.status === "faol" && (g.students?.length ?? 0) < g.max_students
+    (g) => g.status !== "yopiq" && (g.students?.length ?? 0) < g.max_students
   );
 
   // Tahrirlashda har doim kurs/daraja maydonlari ko'rsatiladi — guruhga
@@ -252,10 +252,12 @@ export function StudentForm({
                   .filter((g) => g.course_id === courseId)
                   .map((g) => {
                     const shiftMeta = SHIFT_META[g.shift];
+                    const statusMeta = GROUP_STATUS_META[g.status];
                     return (
                       <option key={g.id} value={g.id}>
                         {g.name}
                         {shiftMeta ? ` · ${shiftMeta.emoji} ${shiftMeta.label} (${shiftMeta.korean})` : ""}
+                        {statusMeta.label === "Yig'ilmoqda" ? ` · ${statusMeta.label}` : ""}
                       </option>
                     );
                   })}
