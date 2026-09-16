@@ -36,6 +36,7 @@ export interface Student {
   group_id: string | null;
   status: StudentStatus;
   enrollment_type: "individual" | "group";
+  desired_shift: GroupShift | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

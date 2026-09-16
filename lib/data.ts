@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { READY_POOL_SIZE } from "@/lib/constants";
-import type { Course, Group, Student, StudentWithRelations } from "@/lib/types";
+import type { Course, Group, GroupShift, Student, StudentWithRelations } from "@/lib/types";
 
 export async function getCourses() {
   const supabase = createClient();
@@ -120,6 +120,7 @@ export async function getMatchingGroups(courseId: string, level: number) {
 export interface Pool {
   courseId: string;
   courseName: string;
+  shift: GroupShift;
   count: number;
   ready: boolean;
   students: StudentWithRelations[];
@@ -138,18 +139,23 @@ export async function getPools(): Promise<Pool[]> {
 
   const students = (data ?? []).map(normalizeStudent);
 
+  // Havzalar endi kurs VA smena bo'yicha alohida-alohida: bir xil smenani
+  // tanlagan o'quvchilar bitta havzada yig'iladi, boshqa smenadagilar esa
+  // butunlay alohida havzada ko'rinadi.
   const grouped = new Map<string, StudentWithRelations[]>();
   for (const s of students) {
-    const key = s.course_id;
+    if (!s.desired_shift) continue; // eski (shift'siz) yozuvlar ko'rsatilmaydi
+    const key = `${s.course_id}::${s.desired_shift}`;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(s);
   }
 
   const pools: Pool[] = [];
-  for (const [courseId, list] of grouped) {
+  for (const list of grouped.values()) {
     pools.push({
-      courseId,
+      courseId: list[0].course_id,
       courseName: list[0].course?.name ?? "Noma'lum kurs",
+      shift: list[0].desired_shift as GroupShift,
       count: list.length,
       ready: list.length >= READY_POOL_SIZE,
       students: list,
@@ -159,9 +165,9 @@ export async function getPools(): Promise<Pool[]> {
   return pools.sort((a, b) => b.count - a.count);
 }
 
-export async function getPoolByCourse(courseId: string): Promise<Pool | null> {
+export async function getPoolByCourseAndShift(courseId: string, shift: GroupShift): Promise<Pool | null> {
   const pools = await getPools();
-  return pools.find((p) => p.courseId === courseId) ?? null;
+  return pools.find((p) => p.courseId === courseId && p.shift === shift) ?? null;
 }
 
 // Allaqachon ochilgan, lekin hali to'lmagan ("yigilmoqda") haqiqiy

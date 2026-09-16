@@ -25,6 +25,7 @@ export function GroupForm({
   defaultCourseId,
   defaultMinLevel,
   defaultMaxLevel,
+  defaultShift,
   presetName,
   presetStudents,
 }: {
@@ -32,6 +33,7 @@ export function GroupForm({
   defaultCourseId?: string;
   defaultMinLevel?: number;
   defaultMaxLevel?: number;
+  defaultShift?: GroupShift;
   presetName?: string;
   presetStudents?: { id: string; full_name: string; phone: string }[];
 }) {
@@ -41,7 +43,7 @@ export function GroupForm({
   const selectedCourse = courses.find((c) => c.id === courseId);
   const levels = getLevelsForCourse(selectedCourse?.name);
   const [days, setDays] = useState<string[]>([]);
-  const [shift, setShift] = useState<GroupShift>("kunduzgi");
+  const [shift, setShift] = useState<GroupShift>(defaultShift ?? "kunduzgi");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -187,11 +189,12 @@ export function GroupForm({
               <button
                 type="button"
                 key={s}
+                disabled={isFromCall}
                 onClick={() => setShift(s)}
-                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2.5 text-sm font-medium transition-colors ${
+                className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed ${
                   active
                     ? "bg-primary-500 border-primary-500 text-slate-900"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-60 disabled:hover:bg-white"
                 }`}
               >
                 <span>
@@ -204,6 +207,11 @@ export function GroupForm({
             );
           })}
         </div>
+        {isFromCall && (
+          <p className="text-xs text-slate-400 mt-1.5">
+            Smena o'quvchilar qo'shilganda tanlangan — bu yerda o'zgartirilmaydi.
+          </p>
+        )}
         <input type="hidden" name="shift" value={shift} />
       </div>
 

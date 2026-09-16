@@ -5,9 +5,9 @@ import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Loader2, User, Phone, BarChart3, Users, Check, GraduationCap } from "lucide-react";
 import { createStudent, updateStudent } from "@/lib/actions";
-import { getLevelsForCourse, SHIFT_META, GROUP_STATUS_META } from "@/lib/constants";
+import { getLevelsForCourse, SHIFTS, SHIFT_META } from "@/lib/constants";
 import { useToast } from "@/components/ToastProvider";
-import type { Course, Group, Student } from "@/lib/types";
+import type { Course, Group, GroupShift, Student } from "@/lib/types";
 
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -61,11 +61,7 @@ export function StudentForm({
   );
   const selectedCourse = courses.find((c) => c.id === courseId);
   const levels = getLevelsForCourse(selectedCourse?.name);
-  const [groupId, setGroupId] = useState(student?.group_id ?? "");
-
-  const openGroups = (groups ?? []).filter(
-    (g) => g.status !== "yopiq" && (g.students?.length ?? 0) < g.max_students
-  );
+  const [shift, setShift] = useState<GroupShift>(student?.desired_shift ?? "kunduzgi");
 
   // Tahrirlashda har doim kurs/daraja maydonlari ko'rsatiladi — guruhga
   // biriktirish/chiqarish alohida joyda (profil sahifasida) boshqariladi.
@@ -219,10 +215,7 @@ export function StudentForm({
                 id="course_id_pool"
                 className="input pl-10"
                 value={courseId}
-                onChange={(e) => {
-                  setCourseId(e.target.value);
-                  setGroupId("");
-                }}
+                onChange={(e) => setCourseId(e.target.value)}
               >
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -234,35 +227,37 @@ export function StudentForm({
           </div>
 
           <div>
-            <label className="label" htmlFor="group_id">
-              Guruh
-            </label>
-            <div className="relative">
-              <Users className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <select
-                key={courseId}
-                id="group_id"
-                name="group_id"
-                className="input pl-10"
-                defaultValue={student?.group_id ?? ""}
-                onChange={(e) => setGroupId(e.target.value)}
-              >
-                <option value="">0 dan</option>
-                {openGroups
-                  .filter((g) => g.course_id === courseId)
-                  .map((g) => {
-                    const shiftMeta = SHIFT_META[g.shift];
-                    const statusMeta = GROUP_STATUS_META[g.status];
-                    return (
-                      <option key={g.id} value={g.id}>
-                        {g.name}
-                        {shiftMeta ? ` · ${shiftMeta.emoji} ${shiftMeta.label} (${shiftMeta.korean})` : ""}
-                        {statusMeta.label === "Yig'ilmoqda" ? ` · ${statusMeta.label}` : ""}
-                      </option>
-                    );
-                  })}
-              </select>
+            <label className="label">Xohlagan smena</label>
+            <div className="grid grid-cols-2 gap-2">
+              {SHIFTS.map((s) => {
+                const meta = SHIFT_META[s];
+                const active = shift === s;
+                return (
+                  <button
+                    type="button"
+                    key={s}
+                    onClick={() => setShift(s)}
+                    className={`flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2.5 text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-primary-500 border-primary-500 text-slate-900"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>
+                      {meta.emoji} {meta.label} · {meta.korean}
+                    </span>
+                    <span className={`text-xs ${active ? "text-slate-800" : "text-slate-400"}`}>
+                      {meta.range}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
+            <input type="hidden" name="shift" value={shift} />
+            <p className="text-xs text-slate-400 mt-1.5">
+              O'quvchi shu smena bo'yicha yig'ilish ro'yxatiga tushadi — telefon
+              qilib tasdiqlangach, guruh ochiladi.
+            </p>
           </div>
         </>
       )}

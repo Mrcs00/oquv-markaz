@@ -58,58 +58,29 @@ export async function createStudent(_prevState: ActionResult, formData: FormData
   }
 
   if (mode === "group") {
-    const group_id = String(formData.get("group_id") || "");
     const course_id = String(formData.get("course_id") || "");
+    const shift = String(formData.get("shift") || "") as GroupShift;
 
     if (!course_id) return fail("Kurs aniqlanmadi.");
-
-    if (!group_id) {
-      // "0 dan": hali guruh ochilmagan, guruhsiz "kutmoqda" havzasiga qo'shiladi.
-      const { error } = await supabase.from("students").insert({
-        full_name,
-        phone,
-        phone2: phone2 || null,
-        course_id,
-        level: 0,
-        status: "kutmoqda",
-        enrollment_type: "group",
-      });
-
-      if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
-    } else {
-      // Tanlangan guruhga to'g'ridan-to'g'ri qo'shiladi.
-      const { data: group } = await supabase
-        .from("groups")
-        .select("id, course_id, min_level, max_students")
-        .eq("id", group_id)
-        .single();
-
-      if (!group) return fail("Guruh topilmadi.");
-
-      const { count } = await supabase
-        .from("students")
-        .select("id", { count: "exact", head: true })
-        .eq("group_id", group_id)
-        .is("deleted_at", null);
-
-      if ((count ?? 0) >= group.max_students) {
-        return fail("Bu guruh to'liq. Boshqa guruh tanlang.");
-      }
-
-      const { error } = await supabase.from("students").insert({
-        full_name,
-        phone,
-        phone2: phone2 || null,
-        course_id: group.course_id,
-        level: group.min_level,
-        group_id,
-        status: "faol",
-        enrollment_type: "group",
-      });
-
-      if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
-      await maybeActivateGroup(supabase, group_id);
+    if (shift !== "ertalabki" && shift !== "kunduzgi") {
+      return fail("Smenani tanlang: ertalabki (오전) yoki kunduzgi (오후).");
     }
+
+    // "0 dan": hali guruh ochilmagan — o'quvchi tanlagan smenasi bo'yicha
+    // "kutmoqda" havzasiga qo'shiladi. Guruh faqat qo'ng'iroq qilib,
+    // kamida bitta "Kelaman" natijasi olingandan keyin ochiladi.
+    const { error } = await supabase.from("students").insert({
+      full_name,
+      phone,
+      phone2: phone2 || null,
+      course_id,
+      level: 0,
+      status: "kutmoqda",
+      enrollment_type: "group",
+      desired_shift: shift,
+    });
+
+    if (error) return fail("O'quvchini saqlashda xatolik yuz berdi.");
   } else {
     // Individual: kurs va daraja bo'yicha, guruhsiz saqlanadi.
     const course_id = String(formData.get("course_id") || "");

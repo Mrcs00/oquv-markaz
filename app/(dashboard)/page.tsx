@@ -34,12 +34,16 @@ export default async function DashboardPage() {
           <section>
             <h2 className="text-sm font-semibold text-slate-900 mb-3">Guruhlarni yig'ish</h2>
             <div className="grid md:grid-cols-2 gap-4">
-              {stats.pools.map((pool) => (
-                <div key={pool.courseId} className="card p-5">
+              {stats.pools.map((pool) => {
+                const shiftMeta = SHIFT_META[pool.shift];
+                return (
+                <div key={`${pool.courseId}-${pool.shift}`} className="card p-5">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-semibold text-slate-900">{pool.courseName} — Beginner</p>
-                      <p className="text-sm text-slate-500 mt-0.5">Daraja: 0 dan</p>
+                      <p className="text-sm text-slate-500 mt-0.5">
+                        {shiftMeta.emoji} {shiftMeta.label} · {shiftMeta.korean} ({shiftMeta.range})
+                      </p>
                     </div>
                     {pool.ready ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-success-50 text-success-600">
@@ -75,12 +79,13 @@ export default async function DashboardPage() {
                     )}
                   </div>
 
-                  <Link href={`/call/${pool.courseId}`} className="btn-primary w-full mt-4">
+                  <Link href={`/call/${pool.courseId}/${pool.shift}`} className="btn-primary w-full mt-4">
                     <PhoneCall className="w-4 h-4" />
                     Telefon qilish va natijalarni kiritish
                   </Link>
                 </div>
-              ))}
+                );
+              })}
 
               {stats.individualWaiting.length > 0 && (
                 <div className="card p-5">
