@@ -11,6 +11,7 @@ import {
   X,
   Plus,
   Trash2,
+  ClipboardCheck,
   Settings,
   LogOut,
   ArrowLeft,
@@ -25,6 +26,7 @@ const BOTTOM_ITEMS = [
 ];
 
 const DRAWER_EXTRA = [
+  { href: "/topik", label: "TOPIK", icon: ClipboardCheck },
   { href: "/deleted", label: "O'chirilganlar", icon: Trash2 },
   { href: "/settings", label: "Sozlamalar", icon: Settings },
 ];

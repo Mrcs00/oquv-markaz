@@ -8,6 +8,7 @@ import {
   GraduationCap as StudentsIcon,
   Users,
   Trash2,
+  ClipboardCheck,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Bosh sahifa", icon: Home },
   { href: "/students", label: "Yangi o'quvchilar", icon: StudentsIcon },
   { href: "/groups", label: "Guruhlar", icon: Users },
+  { href: "/topik", label: "TOPIK", icon: ClipboardCheck },
   { href: "/deleted", label: "O'chirilganlar", icon: Trash2 },
   { href: "/settings", label: "Sozlamalar", icon: Settings },
 ];

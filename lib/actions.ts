@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { CallResultValue, GroupShift } from "@/lib/types";
+import type { CallResultValue, GroupShift, TopikLevel, TopikResult } from "@/lib/types";
 import { SHIFT_META } from "@/lib/constants";
 
 export type ActionResult = { success?: boolean; error?: string };
@@ -410,6 +410,109 @@ export async function deleteGroup(groupId: string): Promise<ActionResult> {
   revalidatePath("/students");
   revalidatePath("/");
   redirect("/groups");
+}
+
+// ------------------------------------------------------------
+// TOPIK ARIZACHILARI
+// ------------------------------------------------------------
+
+type TopikFields = {
+  exam_round: number;
+  level: TopikLevel;
+  exam_number: string;
+  first_name: string;
+  last_name: string;
+  birth_year: number | null;
+  result: TopikResult;
+  note: string;
+};
+
+function parseTopikForm(formData: FormData): TopikFields | ActionResult {
+  const exam_round = Number(formData.get("exam_round"));
+  const level = Number(formData.get("level"));
+  const exam_number = String(formData.get("exam_number") || "").trim();
+  const first_name = String(formData.get("first_name") || "").trim();
+  const last_name = String(formData.get("last_name") || "").trim();
+  const birthRaw = String(formData.get("birth_year") || "").trim();
+  const result = String(formData.get("result") || "kutilmoqda") as TopikResult;
+  const note = String(formData.get("note") || "").trim();
+
+  if (!Number.isInteger(exam_round) || exam_round <= 0) {
+    return fail("Imtihon raundini kiriting (masalan, 108).");
+  }
+  if (level !== 1 && level !== 2) return fail("Darajani tanlang: TOPIK I yoki TOPIK II.");
+  if (!exam_number) return fail("Imtihon raqamini kiriting.");
+  if (!first_name || !last_name) return fail("Ism va familiyani kiriting.");
+
+  let birth_year: number | null = null;
+  if (birthRaw) {
+    birth_year = Number(birthRaw);
+    if (!Number.isInteger(birth_year) || birth_year < 1900 || birth_year > 2100) {
+      return fail("Tug'ilgan yil noto'g'ri.");
+    }
+  }
+
+  if (!["kutilmoqda", "otdi", "otmadi"].includes(result)) return fail("Natija noto'g'ri.");
+
+  return {
+    exam_round,
+    level: level as TopikLevel,
+    exam_number,
+    first_name,
+    last_name,
+    birth_year,
+    result,
+    note,
+  };
+}
+
+function isActionResult(v: TopikFields | ActionResult): v is ActionResult {
+  return "error" in v;
+}
+
+export async function createTopikApplicant(formData: FormData): Promise<ActionResult> {
+  const parsed = parseTopikForm(formData);
+  if (isActionResult(parsed)) return parsed;
+
+  const supabase = createClient();
+  const { error } = await supabase.from("topik_applicants").insert(parsed);
+
+  if (error) {
+    if (error.code === "23505") {
+      return fail("Bu raund va darajada shu imtihon raqami allaqachon kiritilgan.");
+    }
+    return fail("Saqlashda xatolik yuz berdi.");
+  }
+
+  revalidatePath("/topik");
+  return { success: true };
+}
+
+export async function updateTopikApplicant(id: string, formData: FormData): Promise<ActionResult> {
+  const parsed = parseTopikForm(formData);
+  if (isActionResult(parsed)) return parsed;
+
+  const supabase = createClient();
+  const { error } = await supabase.from("topik_applicants").update(parsed).eq("id", id);
+
+  if (error) {
+    if (error.code === "23505") {
+      return fail("Bu raund va darajada shu imtihon raqami allaqachon kiritilgan.");
+    }
+    return fail("Saqlashda xatolik yuz berdi.");
+  }
+
+  revalidatePath("/topik");
+  return { success: true };
+}
+
+export async function deleteTopikApplicant(id: string): Promise<ActionResult> {
+  const supabase = createClient();
+  const { error } = await supabase.from("topik_applicants").delete().eq("id", id);
+  if (error) return fail("O'chirishda xatolik yuz berdi.");
+
+  revalidatePath("/topik");
+  return { success: true };
 }
 
 // ------------------------------------------------------------

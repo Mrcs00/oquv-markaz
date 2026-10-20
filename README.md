@@ -139,3 +139,13 @@ Bu versiya ataylab sodda qilib qurilgan (CRM, to'lov, davomat, SMS va h.k.
 qo'shilmagan — talabga ko'ra). Kelajakda kerak bo'lsa, quyidagilarni alohida
 so'rov sifatida qo'shish mumkin: davomat jadvali, to'lov moduli, SMS/Telegram
 xabarnomalari, kurslarni Sozlamalar sahifasidan boshqarish.
+
+---
+
+## TOPIK bo'limi
+
+Imtihonga kirgan o'quvchilar ro'yxati (`/topik`): imtihon raundi, daraja (TOPIK I/II),
+imtihon raqami, ism, familiya, tug'ilgan yil, natija va izoh. Qidiruv va filtr bilan.
+
+Ishlatishdan oldin Supabase → SQL Editor'da `supabase/migrations/0009_add_topik_applicants.sql`
+faylini bir marta ishga tushiring.

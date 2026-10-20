@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { READY_POOL_SIZE } from "@/lib/constants";
-import type { Course, Group, GroupShift, Student, StudentWithRelations } from "@/lib/types";
+import type { Course, Group, GroupShift, Student, StudentWithRelations, TopikApplicant } from "@/lib/types";
 
 export async function getCourses() {
   const supabase = createClient();
@@ -262,4 +262,32 @@ export async function getDashboardStats() {
     individualWaiting,
     recentStudents: (recent.data ?? []).map(normalizeStudent),
   };
+}
+
+// ------------------------------------------------------------
+// TOPIK ARIZACHILARI
+// Supabase bir so'rovda ko'pi bilan 1000 qator qaytaradi, shuning
+// uchun hammasini sahifalab olamiz.
+// ------------------------------------------------------------
+
+export async function getTopikApplicants(): Promise<TopikApplicant[]> {
+  const supabase = createClient();
+  const PAGE = 1000;
+  const all: TopikApplicant[] = [];
+
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("topik_applicants")
+      .select("*")
+      .order("exam_round", { ascending: false })
+      .order("level", { ascending: false })
+      .order("last_name", { ascending: true })
+      .range(from, from + PAGE - 1);
+
+    if (error || !data) break;
+    all.push(...(data as TopikApplicant[]));
+    if (data.length < PAGE) break;
+  }
+
+  return all;
 }

@@ -66,6 +66,23 @@ export interface GroupWithRelations extends Group {
 // Minimal hand-written Database type for supabase-js generics.
 // Regenerate with `supabase gen types typescript` once the project is linked
 // if you want fully strict types.
+export type TopikLevel = 1 | 2;
+export type TopikResult = "kutilmoqda" | "otdi" | "otmadi";
+
+export interface TopikApplicant {
+  id: string;
+  exam_round: number;
+  level: TopikLevel;
+  exam_number: string;
+  first_name: string;
+  last_name: string;
+  birth_year: number | null;
+  result: TopikResult;
+  note: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
