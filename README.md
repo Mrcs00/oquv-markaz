@@ -148,4 +148,4 @@ Imtihonga kirgan o'quvchilar ro'yxati (`/topik`): imtihon raundi, daraja (TOPIK 
 imtihon raqami, ism, familiya, tug'ilgan yil, natija va izoh. Qidiruv va filtr bilan.
 
 Ishlatishdan oldin Supabase → SQL Editor'da `supabase/migrations/0009_add_topik_applicants.sql`
-faylini bir marta ishga tushiring.
+faylini, keyin `0010_topik_birth_date.sql` faylini ishga tushiring.

@@ -19,6 +19,13 @@ const RESULT_META: Record<TopikResult, { label: string; className: string }> = {
 
 const levelLabel = (level: number) => (level === 1 ? "TOPIK I" : "TOPIK II");
 
+// "2005-03-15" -> "15.03.2005" (Date ishlatilmaydi, vaqt zonasi siljishi bo'lmasligi uchun)
+function formatDate(iso: string | null): string {
+  if (!iso) return "—";
+  const [y, m, d] = iso.split("-");
+  return `${d}.${m}.${y}`;
+}
+
 function ResultBadge({ result }: { result: TopikResult }) {
   const meta = RESULT_META[result];
   return (
@@ -55,7 +62,7 @@ export function TopikManager({ applicants }: { applicants: TopikApplicant[] }) {
         `${a.first_name} ${a.last_name}`,
         `${a.last_name} ${a.first_name}`,
         a.exam_number,
-        a.birth_year ? String(a.birth_year) : "",
+        a.birth_date ? `${formatDate(a.birth_date)}|${a.birth_date}` : "",
       ]
         .join("|")
         .toLowerCase();
@@ -73,7 +80,7 @@ export function TopikManager({ applicants }: { applicants: TopikApplicant[] }) {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               className="input pl-10"
-              placeholder="Qidirish… (ism, familiya yoki imtihon raqami)"
+              placeholder="Qidirish… (ism, familiya, raqam yoki tug'ilgan sana)"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -157,8 +164,8 @@ export function TopikManager({ applicants }: { applicants: TopikApplicant[] }) {
                 <p className="text-slate-900 font-medium tabular-nums">{a.exam_number}</p>
               </div>
               <div>
-                <p className="text-slate-400">Tug'ilgan yil</p>
-                <p className="text-slate-900 font-medium tabular-nums">{a.birth_year ?? "—"}</p>
+                <p className="text-slate-400">Tug'ilgan sana</p>
+                <p className="text-slate-900 font-medium tabular-nums">{formatDate(a.birth_date)}</p>
               </div>
             </div>
             {a.note && <p className="text-xs text-slate-500 mt-2.5">{a.note}</p>}
@@ -183,7 +190,7 @@ export function TopikManager({ applicants }: { applicants: TopikApplicant[] }) {
                 <th className="px-5 py-3 font-medium">Imtihon raqami</th>
                 <th className="px-5 py-3 font-medium">Familiya</th>
                 <th className="px-5 py-3 font-medium">Ism</th>
-                <th className="px-5 py-3 font-medium">Tug'ilgan yil</th>
+                <th className="px-5 py-3 font-medium">Tug'ilgan sana</th>
                 <th className="px-5 py-3 font-medium">Natija</th>
                 <th className="px-5 py-3 font-medium">Izoh</th>
                 <th className="px-5 py-3 font-medium"></th>
@@ -200,7 +207,7 @@ export function TopikManager({ applicants }: { applicants: TopikApplicant[] }) {
                   </td>
                   <td className="px-5 py-3.5 text-slate-900">{a.last_name}</td>
                   <td className="px-5 py-3.5 text-slate-900">{a.first_name}</td>
-                  <td className="px-5 py-3.5 text-slate-600 tabular-nums">{a.birth_year ?? "—"}</td>
+                  <td className="px-5 py-3.5 text-slate-600 tabular-nums">{formatDate(a.birth_date)}</td>
                   <td className="px-5 py-3.5">
                     <ResultBadge result={a.result} />
                   </td>
@@ -387,19 +394,17 @@ function ApplicantSheet({
           </div>
 
           <div>
-            <label className="label" htmlFor="birth_year">
-              Tug'ilgan yil
+            <label className="label" htmlFor="birth_date">
+              Tug'ilgan sana
             </label>
             <input
-              id="birth_year"
-              name="birth_year"
-              type="number"
-              inputMode="numeric"
-              min={1900}
-              max={2100}
-              placeholder="2005"
+              id="birth_date"
+              name="birth_date"
+              type="date"
+              min="1900-01-01"
+              max={new Date().toISOString().slice(0, 10)}
               className="input tabular-nums"
-              defaultValue={applicant?.birth_year ?? ""}
+              defaultValue={applicant?.birth_date ?? ""}
             />
           </div>
           <div>

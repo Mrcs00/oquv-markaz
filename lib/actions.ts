@@ -422,7 +422,7 @@ type TopikFields = {
   exam_number: string;
   first_name: string;
   last_name: string;
-  birth_year: number | null;
+  birth_date: string | null;
   result: TopikResult;
   note: string;
 };
@@ -433,7 +433,7 @@ function parseTopikForm(formData: FormData): TopikFields | ActionResult {
   const exam_number = String(formData.get("exam_number") || "").trim();
   const first_name = String(formData.get("first_name") || "").trim();
   const last_name = String(formData.get("last_name") || "").trim();
-  const birthRaw = String(formData.get("birth_year") || "").trim();
+  const birthRaw = String(formData.get("birth_date") || "").trim();
   const result = String(formData.get("result") || "kutilmoqda") as TopikResult;
   const note = String(formData.get("note") || "").trim();
 
@@ -444,12 +444,20 @@ function parseTopikForm(formData: FormData): TopikFields | ActionResult {
   if (!exam_number) return fail("Imtihon raqamini kiriting.");
   if (!first_name || !last_name) return fail("Ism va familiyani kiriting.");
 
-  let birth_year: number | null = null;
+  let birth_date: string | null = null;
   if (birthRaw) {
-    birth_year = Number(birthRaw);
-    if (!Number.isInteger(birth_year) || birth_year < 1900 || birth_year > 2100) {
-      return fail("Tug'ilgan yil noto'g'ri.");
-    }
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthRaw);
+    const d = m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : null;
+    const valid =
+      m &&
+      d &&
+      d.getUTCFullYear() === +m[1] &&
+      d.getUTCMonth() === +m[2] - 1 &&
+      d.getUTCDate() === +m[3] &&
+      +m[1] >= 1900 &&
+      d.getTime() <= Date.now();
+    if (!valid) return fail("Tug'ilgan sana noto'g'ri.");
+    birth_date = birthRaw;
   }
 
   if (!["kutilmoqda", "otdi", "otmadi"].includes(result)) return fail("Natija noto'g'ri.");
@@ -460,7 +468,7 @@ function parseTopikForm(formData: FormData): TopikFields | ActionResult {
     exam_number,
     first_name,
     last_name,
-    birth_year,
+    birth_date,
     result,
     note,
   };

@@ -76,7 +76,7 @@ export interface TopikApplicant {
   exam_number: string;
   first_name: string;
   last_name: string;
-  birth_year: number | null;
+  birth_date: string | null;
   result: TopikResult;
   note: string;
   created_at: string;
