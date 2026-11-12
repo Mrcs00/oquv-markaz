@@ -64,7 +64,7 @@ export function ConfirmButton({
       {open && (
         <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-slate-900/40" onClick={() => !isPending && setOpen(false)} />
-          <div className="relative w-full sm:max-w-sm bg-white rounded-t-2xl sm:rounded-2xl p-5 shadow-cardHover animate-in fade-in slide-in-from-bottom-4 duration-150">
+          <div className="relative w-full sm:max-w-sm bg-white rounded-t-2xl sm:rounded-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-cardHover animate-in fade-in slide-in-from-bottom-4 duration-150">
             <h3 className="text-base font-semibold text-slate-900">{title}</h3>
             <p className="text-sm text-slate-500 mt-1.5">{description}</p>
             <div className="flex gap-2.5 mt-5">

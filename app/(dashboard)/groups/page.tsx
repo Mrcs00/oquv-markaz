@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { GroupsList } from "@/components/GroupsList";
+import { FabLink } from "@/components/Fab";
 import { getGroups, getIndividualConfirmed } from "@/lib/data";
 
 export default async function GroupsPage() {
@@ -18,9 +19,12 @@ export default async function GroupsPage() {
           </Link>
         }
       />
-      <div className="p-4 md:p-8">
+      <div className="p-4 md:p-8 pb-24 md:pb-8">
         <GroupsList groups={groups} individualCount={individualConfirmed.length} />
       </div>
+      <FabLink href="/groups/new" label="Yangi guruh yaratish">
+        <Plus className="w-6 h-6" />
+      </FabLink>
     </div>
   );
 }

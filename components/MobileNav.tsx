@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   GraduationCap,
@@ -35,13 +35,23 @@ export function MobileHeader({ title, backHref }: { title: string; backHref?: st
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  // Menyu ochiq turganda orqadagi sahifa aylanib ketmasin
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
     <>
       <header className="md:hidden sticky top-0 z-40 flex items-center justify-between h-14 px-4 bg-white/90 backdrop-blur border-b border-slate-100">
         {backHref ? (
           <Link
             href={backHref}
-            className="p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100"
+            className="flex items-center justify-center w-11 h-11 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100 active:bg-slate-100"
             aria-label="Orqaga"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -49,14 +59,14 @@ export function MobileHeader({ title, backHref }: { title: string; backHref?: st
         ) : (
           <button
             onClick={() => setOpen(true)}
-            className="p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100"
+            className="flex items-center justify-center w-11 h-11 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100 active:bg-slate-100"
             aria-label="Menyu"
           >
             <Menu className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-sm font-semibold text-slate-900 truncate">{title}</h1>
-        <div className="w-9" />
+        <h1 className="text-[15px] font-semibold text-slate-900 truncate">{title}</h1>
+        <div className="w-11" />
       </header>
 
       {open && (
@@ -72,7 +82,8 @@ export function MobileHeader({ title, backHref }: { title: string; backHref?: st
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="p-2 rounded-lg text-slate-500 hover:bg-slate-100"
+                aria-label="Yopish"
+                className="flex items-center justify-center w-11 h-11 -mr-2 rounded-lg text-slate-500 hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -87,7 +98,7 @@ export function MobileHeader({ title, backHref }: { title: string; backHref?: st
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium ${
+                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium ${
                       active ? "bg-primary-50 text-primary-700" : "text-slate-600 hover:bg-slate-50"
                     }`}
                   >
@@ -98,11 +109,11 @@ export function MobileHeader({ title, backHref }: { title: string; backHref?: st
               })}
             </nav>
 
-            <div className="border-t border-slate-100 p-3">
+            <div className="border-t border-slate-100 px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-danger-600 hover:bg-danger-50"
+                  className="flex w-full items-center gap-3 px-3 py-3 rounded-xl text-[15px] font-medium text-danger-600 hover:bg-danger-50"
                 >
                   <LogOut className="w-[18px] h-[18px]" />
                   Chiqish
@@ -128,8 +139,13 @@ export function MobileBottomNav() {
 
           if (item.primary) {
             return (
-              <Link key={item.href} href={item.href} className="flex items-center justify-center">
-                <span className="w-11 h-11 rounded-full bg-primary-500 flex items-center justify-center text-slate-900 shadow-cardHover -translate-y-1">
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-label="Yangi o'quvchi qo'shish"
+                className="flex items-center justify-center"
+              >
+                <span className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center text-slate-900 shadow-cardHover -translate-y-1">
                   <Icon className="w-5 h-5" />
                 </span>
               </Link>
@@ -140,7 +156,7 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${
+              className={`flex flex-col items-center justify-center gap-0.5 text-xs font-medium active:bg-slate-50 ${
                 active ? "text-primary-600" : "text-slate-400"
               }`}
             >

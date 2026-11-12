@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, ChevronRight, Phone } from "lucide-react";
+import { ChevronRight, Phone } from "lucide-react";
+import { SearchInput } from "@/components/SearchInput";
 import { StatusBadge, CallResultBadge } from "@/components/Badges";
 import { levelLabel } from "@/lib/constants";
 import type { StudentWithRelations } from "@/lib/types";
@@ -20,13 +21,11 @@ export function StudentsList({ students }: { students: StudentWithRelations[] })
 
   return (
     <div>
-      <div className="relative mb-4">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
-          className="input pl-10"
-          placeholder="O'quvchi qidirish… (ism yoki telefon)"
+      <div className="sticky-bar">
+        <SearchInput
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={setSearch}
+          placeholder="O'quvchi qidirish… (ism yoki telefon)"
         />
       </div>
 
@@ -37,7 +36,7 @@ export function StudentsList({ students }: { students: StudentWithRelations[] })
       {/* Mobile: cards */}
       <div className="grid gap-3 md:hidden">
         {filtered.map((s) => (
-          <Link key={s.id} href={`/students/${s.id}`} className="card p-4 flex items-center gap-3">
+          <Link key={s.id} href={`/students/${s.id}`} className="card p-4 flex items-center gap-3 active:bg-slate-50">
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-500 shrink-0">
               {s.full_name.charAt(0)}
             </div>

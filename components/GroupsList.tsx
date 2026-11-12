@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Users, Clock, Calendar, UserCheck } from "lucide-react";
+import { Users, Clock, Calendar, UserCheck } from "lucide-react";
+import { SearchInput } from "@/components/SearchInput";
 import { levelLabel, SHIFT_META, GROUP_STATUS_META } from "@/lib/constants";
 import type { Group } from "@/lib/types";
 
@@ -29,14 +30,8 @@ export function GroupsList({
 
   return (
     <div>
-      <div className="relative mb-4">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
-          className="input pl-10"
-          placeholder="Guruh qidirish…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className="sticky-bar">
+        <SearchInput value={search} onChange={setSearch} placeholder="Guruh qidirish…" />
       </div>
 
       {filtered.length === 0 && !showIndividualCard && (

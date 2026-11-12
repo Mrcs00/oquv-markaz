@@ -28,14 +28,16 @@ export default async function GroupDetailPage({ params }: { params: { id: string
               <p className="p-5 text-sm text-slate-400">Bu guruhda hali o'quvchi yo'q.</p>
             )}
             {group.students.map((s) => (
-              <div key={s.id} className="flex items-center justify-between gap-3 p-4">
+              <div key={s.id} className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
                 <Link href={`/students/${s.id}`} className="min-w-0 flex-1">
                   <p className="font-medium text-slate-900 text-sm truncate">{s.full_name}</p>
                   <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                     <Phone className="w-3 h-3" /> {s.phone}
                   </p>
                 </Link>
-                <RemoveFromGroupButton studentId={s.id} level={s.level} />
+                <div className="[&>button]:w-full md:[&>button]:w-auto md:shrink-0">
+                  <RemoveFromGroupButton studentId={s.id} level={s.level} />
+                </div>
               </div>
             ))}
           </div>

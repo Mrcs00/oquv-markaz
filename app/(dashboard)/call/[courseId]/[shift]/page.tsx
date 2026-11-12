@@ -56,7 +56,7 @@ export default async function CallPhasePage({
           {pool.students.map((s) => (
             <div key={s.id} className="p-4 space-y-2.5">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-medium text-slate-900 text-sm">{s.full_name}</p>
+                <p className="font-medium text-slate-900 text-sm min-w-0 break-words">{s.full_name}</p>
                 <CallLink phone={s.phone} />
               </div>
               <CallResultButtons studentId={s.id} currentResult={s.call_result?.result} />
@@ -64,7 +64,7 @@ export default async function CallPhasePage({
           ))}
         </div>
 
-        <div className="sticky bottom-20 md:bottom-6">
+        <div className="sticky bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-6">
           {comingCount > 0 ? (
             <Link
               href={`/call/${pool.courseId}/${pool.shift}/open`}

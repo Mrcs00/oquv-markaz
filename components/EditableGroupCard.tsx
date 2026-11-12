@@ -74,11 +74,7 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
                     onClick={() =>
                       setDays((prev) => (active ? prev.filter((x) => x !== d) : [...prev, d]))
                     }
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                      active
-                        ? "bg-primary-500 border-primary-500 text-slate-900"
-                        : "bg-white border-slate-200 text-slate-600"
-                    }`}
+                    className={`chip ${active ? "chip-on" : "chip-off"}`}
                   >
                     {d}
                   </button>
@@ -124,14 +120,17 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
               name="max_students"
               type="number"
               min={1}
+              inputMode="numeric"
               className="input"
               defaultValue={group.max_students}
             />
           </div>
-          <SubmitButton />
-          <button type="button" onClick={() => setEditing(false)} className="btn-ghost w-full">
-            Bekor qilish
-          </button>
+          <div className="form-footer">
+            <SubmitButton />
+            <button type="button" onClick={() => setEditing(false)} className="btn-ghost w-full">
+              Bekor qilish
+            </button>
+          </div>
         </form>
       </div>
     );
@@ -168,10 +167,10 @@ export function EditableGroupCard({ group, courseName }: { group: Group; courseN
       </div>
       <dl className="space-y-3.5">
         {rows.map((r) => (
-          <div key={r.label} className="flex items-center gap-3 text-sm">
-            <r.icon className="w-4 h-4 text-slate-400 shrink-0" />
-            <dt className="text-slate-500 w-32 shrink-0">{r.label}</dt>
-            <dd className="text-slate-900 font-medium">{r.value}</dd>
+          <div key={r.label} className="flex items-start gap-3 text-sm">
+            <r.icon className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+            <dt className="text-slate-500 w-28 md:w-32 shrink-0">{r.label}</dt>
+            <dd className="text-slate-900 font-medium min-w-0 break-words">{r.value}</dd>
           </div>
         ))}
       </dl>

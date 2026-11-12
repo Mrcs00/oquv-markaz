@@ -163,11 +163,7 @@ export function GroupForm({
                 onClick={() =>
                   setDays((prev) => (active ? prev.filter((x) => x !== d) : [...prev, d]))
                 }
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                  active
-                    ? "bg-primary-500 border-primary-500 text-slate-900"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
+                className={`chip ${active ? "chip-on" : "chip-off"}`}
               >
                 {d}
               </button>
@@ -232,6 +228,7 @@ export function GroupForm({
           name="max_students"
           type="number"
           min={1}
+          inputMode="numeric"
           className="input"
           defaultValue={12}
         />
@@ -254,6 +251,7 @@ export function GroupForm({
         </div>
       )}
 
+      <div className="form-footer">
       {isFromCall ? (
         <>
           <button
@@ -264,10 +262,16 @@ export function GroupForm({
             Guruhni ochish ({presetStudents!.length})
           </button>
 
-          {confirmOpen && (
+        </>
+      ) : (
+        <SubmitButton label="Guruhni yaratish" />
+      )}
+      </div>
+
+      {confirmOpen && (
             <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center">
               <div className="absolute inset-0 bg-slate-900/40" onClick={() => setConfirmOpen(false)} />
-              <div className="relative w-full sm:max-w-sm bg-white rounded-t-2xl sm:rounded-2xl p-5 shadow-cardHover">
+              <div className="relative w-full sm:max-w-sm bg-white rounded-t-2xl sm:rounded-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-cardHover">
                 <h3 className="text-base font-semibold text-slate-900">Guruhni ochish</h3>
                 <p className="text-sm text-slate-500 mt-1.5">
                   Guruhni {presetStudents!.length} ta o'quvchi bilan ochmoqchimisiz?
@@ -287,10 +291,6 @@ export function GroupForm({
               </div>
             </div>
           )}
-        </>
-      ) : (
-        <SubmitButton label="Guruhni yaratish" />
-      )}
     </form>
   );
 }

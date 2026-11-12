@@ -36,7 +36,9 @@ export default async function StudentProfilePage({ params }: { params: { id: str
         )}
 
         {student.group_id && (
-          <RemoveFromGroupButton studentId={student.id} level={student.level} />
+          <div className="[&>button]:w-full">
+            <RemoveFromGroupButton studentId={student.id} level={student.level} />
+          </div>
         )}
 
         <ConfirmButton

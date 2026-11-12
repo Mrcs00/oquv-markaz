@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Loader2, User, Phone, BarChart3, Users, Check, GraduationCap } from "lucide-react";
@@ -26,15 +26,23 @@ export function StudentForm({
   groups,
   student,
   onSaved,
+  onCancel,
 }: {
   courses: Course[];
   groups?: (Group & { course: Course | null; students: { id: string }[] })[];
   student?: Student;
   onSaved?: () => void;
+  onCancel?: () => void;
 }) {
   const router = useRouter();
   const { showToast } = useToast();
   const isEdit = Boolean(student);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  // Faqat kompyuterda avtomatik fokus: telefonda klaviatura formaning yarmini yopib qo'ymasligi uchun
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 768px)").matches) nameRef.current?.focus();
+  }, []);
   const [mode, setMode] = useState<"individual" | "group">(student?.group_id ? "group" : "individual");
 
   const action = isEdit ? updateStudent.bind(null, student!.id) : createStudent;
@@ -74,7 +82,7 @@ export function StudentForm({
           <button
             type="button"
             onClick={() => setMode("individual")}
-            className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 min-h-[44px] md:min-h-0 md:py-2 text-sm font-medium transition-colors ${
               mode === "individual" ? "bg-white text-primary-700 shadow-sm" : "text-slate-500"
             }`}
           >
@@ -84,7 +92,7 @@ export function StudentForm({
           <button
             type="button"
             onClick={() => setMode("group")}
-            className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-colors ${
+            className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 min-h-[44px] md:min-h-0 md:py-2 text-sm font-medium transition-colors ${
               mode === "group" ? "bg-white text-primary-700 shadow-sm" : "text-slate-500"
             }`}
           >
@@ -105,8 +113,10 @@ export function StudentForm({
           <input
             id="full_name"
             name="full_name"
+            ref={nameRef}
             required
-            autoFocus
+            autoCapitalize="words"
+            autoComplete="off"
             className="input pl-10"
             placeholder="Muhammad Ali"
             defaultValue={student?.full_name}
@@ -262,7 +272,14 @@ export function StudentForm({
         </>
       )}
 
-      <SubmitButton label="Saqlash" />
+      <div className="form-footer">
+        <SubmitButton label="Saqlash" />
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="btn-ghost w-full">
+            Bekor qilish
+          </button>
+        )}
+      </div>
     </form>
   );
 }

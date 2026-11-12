@@ -40,17 +40,13 @@ export function DeletedStudentsList({ students }: { students: StudentWithRelatio
 
   return (
     <div>
-      <div className="flex flex-wrap gap-1.5 mb-4">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 mb-4 md:mx-0 md:px-0 md:flex-wrap">
         {TABS.map((t) => (
           <button
             key={t.key}
             type="button"
             onClick={() => setTab(t.key)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-              tab === t.key
-                ? "bg-primary-500 border-primary-500 text-slate-900"
-                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-            }`}
+            className={`chip ${tab === t.key ? "chip-on" : "chip-off"}`}
           >
             {t.label} ({counts[t.key]})
           </button>
@@ -62,14 +58,14 @@ export function DeletedStudentsList({ students }: { students: StudentWithRelatio
       ) : (
         <div className="card divide-y divide-slate-100">
           {filtered.map((s) => (
-            <div key={s.id} className="flex items-center justify-between gap-3 p-4">
+            <div key={s.id} className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
                 <p className="font-medium text-slate-900 text-sm truncate">{s.full_name}</p>
                 <p className="text-xs text-slate-500 truncate">
                   {s.phone} · {s.course?.name}
                 </p>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="grid grid-cols-2 gap-2 md:flex md:items-center md:shrink-0">
                 <ConfirmButton
                   label="Tiklash"
                   confirmLabel="Tiklash"

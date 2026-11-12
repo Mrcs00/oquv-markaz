@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="min-h-dvh">
         <Sidebar />
         <div className="md:pl-64">
-          <main className="pb-20 md:pb-8">{children}</main>
+          <main className="pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-8">{children}</main>
         </div>
         <MobileBottomNav />
       </div>

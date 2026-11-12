@@ -104,7 +104,7 @@ export default async function DashboardPage() {
                       <Link
                         key={s.id}
                         href={`/students/${s.id}`}
-                        className="flex items-center justify-between gap-2 py-2 px-2 -mx-2 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="flex items-center justify-between gap-2 py-3 md:py-2 px-2 -mx-2 rounded-lg hover:bg-slate-50 active:bg-slate-50 transition-colors"
                       >
                         <span className="text-sm text-slate-900 truncate">{s.full_name}</span>
                         <span className="text-xs text-slate-400 shrink-0">{s.phone}</span>

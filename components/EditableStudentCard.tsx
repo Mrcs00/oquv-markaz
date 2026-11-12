@@ -21,17 +21,23 @@ export function EditableStudentCard({
   if (editing) {
     return (
       <div className="card p-5 md:p-6">
-        <StudentForm courses={courses} groups={groups} student={student} onSaved={() => setEditing(false)} />
-        <button onClick={() => setEditing(false)} className="btn-ghost w-full mt-2">
-          Bekor qilish
-        </button>
+        <StudentForm
+          courses={courses}
+          groups={groups}
+          student={student}
+          onSaved={() => setEditing(false)}
+          onCancel={() => setEditing(false)}
+        />
       </div>
     );
   }
 
-  const rows = [
-    { icon: Phone, label: "Telefon 1", value: student.phone },
-    ...(student.phone2 ? [{ icon: Phone, label: "Telefon 2", value: student.phone2 }] : []),
+  const telHref = (p: string) => `tel:${p.replace(/\s+/g, "")}`;
+  const rows: { icon: typeof Phone; label: string; value: string; href?: string }[] = [
+    { icon: Phone, label: "Telefon 1", value: student.phone, href: telHref(student.phone) },
+    ...(student.phone2
+      ? [{ icon: Phone, label: "Telefon 2", value: student.phone2, href: telHref(student.phone2) }]
+      : []),
     { icon: BookOpen, label: "Kurs", value: student.course?.name ?? "—" },
     { icon: BarChart3, label: "Daraja", value: levelLabel(student.level) },
     { icon: Users, label: "Guruh", value: student.group?.name ?? "Biriktirilmagan" },
@@ -66,10 +72,21 @@ export function EditableStudentCard({
 
       <dl className="space-y-3.5">
         {rows.map((r) => (
-          <div key={r.label} className="flex items-center gap-3 text-sm">
-            <r.icon className="w-4 h-4 text-slate-400 shrink-0" />
-            <dt className="text-slate-500 w-32 shrink-0">{r.label}</dt>
-            <dd className="text-slate-900 font-medium truncate">{r.value}</dd>
+          <div key={r.label} className="flex items-start gap-3 text-sm">
+            <r.icon className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+            <dt className="text-slate-500 w-28 md:w-32 shrink-0">{r.label}</dt>
+            <dd className="text-slate-900 font-medium min-w-0 break-words">
+              {r.href ? (
+                <a
+                  href={r.href}
+                  className="inline-flex items-center min-h-[44px] -my-3 md:min-h-0 md:my-0 underline decoration-slate-300 underline-offset-4"
+                >
+                  {r.value}
+                </a>
+              ) : (
+                r.value
+              )}
+            </dd>
           </div>
         ))}
       </dl>
